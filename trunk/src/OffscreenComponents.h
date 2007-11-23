@@ -43,12 +43,25 @@
 #include "defs_private.h"
 
 #include GECKO_INCLUDE(xpcom,nsCOMPtr.h)
+#include GECKO_INCLUDE(xpcom,nsIFactory.h)
+#include GECKO_INCLUDE(xpcom,nsIGenericFactory.h)
 
 namespace OSGK
 {
   namespace Impl
   {
-    class FactoryImpl;
+    class FactoryImpl : public nsIFactory
+    {
+    public:
+      NS_DECL_ISUPPORTS
+      NS_DECL_NSIFACTORY
+
+      FactoryImpl (NSConstructorProcPtr ctorFunc) : ctorFunc (ctorFunc) {}
+      ~FactoryImpl() {}
+
+    protected:
+      NSConstructorProcPtr ctorFunc;
+    };
 
     class OffscreenComponents
     {

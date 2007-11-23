@@ -199,6 +199,9 @@ namespace OSGK
       }
     
       NS_IMETHOD Update();
+
+      NS_IMETHOD AddMenuListener(nsIMenuListener * aListener)
+      { return NS_ERROR_NOT_IMPLEMENTED; }
     
       NS_IMETHOD SetColorMap(nsColorMap *aColorMap) { return NS_ERROR_NOT_IMPLEMENTED; }
     
