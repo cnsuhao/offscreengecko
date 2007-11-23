@@ -1,5 +1,10 @@
 2007-11-23	Frank Richter	<frank.richter@gmail.com>
 
+* Replaced use of NS_InitEmbedding/NS_TermEmbedding with
+  XRE_InitEmbedding/XRE_TermEmbedding.
+
+2007-11-23	Frank Richter	<frank.richter@gmail.com>
+
 * Avoid allocating a gfxContext in local code since it'll be freed by libxul,
   potentially causing a memory allocation module mismatch.
 
