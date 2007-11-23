@@ -1,5 +1,9 @@
 2007-11-23	Frank Richter	<frank.richter@gmail.com>
 
+* Fixes for building against FF3b1 version of Gecko.
+  
+2007-11-23	Frank Richter	<frank.richter@gmail.com>
+
 * Fixed nsBaseWidget to compile with "embedded" string API in debug builds.
   
 2007-11-23	Frank Richter	<frank.richter@gmail.com>

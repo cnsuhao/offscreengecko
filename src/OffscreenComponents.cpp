@@ -44,8 +44,6 @@
 #include GECKO_INCLUDE(widget,nsWidgetsCID.h)
 
 #include GECKO_INCLUDE(xpcom,nsIComponentRegistrar.h)
-#include GECKO_INCLUDE(xpcom,nsIGenericFactory.h)
-#include GECKO_INCLUDE(xpcom,nsIFactory.h)
 #include GECKO_INCLUDE(xpcom,nsISupports.h)
 
 #include "OffscreenComponents.h"
@@ -59,21 +57,6 @@ namespace OSGK
     NS_GENERIC_FACTORY_CONSTRUCTOR(OffscreenWidget)
     NS_GENERIC_FACTORY_CONSTRUCTOR(OffscreenDeviceContext)
 
-    /* Header file */
-    class FactoryImpl : public nsIFactory
-    {
-    public:
-      NS_DECL_ISUPPORTS
-      NS_DECL_NSIFACTORY
-
-      FactoryImpl (NSConstructorProcPtr ctorFunc) : ctorFunc (ctorFunc) {}
-      ~FactoryImpl() {}
-
-    protected:
-      NSConstructorProcPtr ctorFunc;
-    };
-
-    /* Implementation file */
     NS_IMPL_ISUPPORTS1(FactoryImpl, nsIFactory)
 
     NS_IMETHODIMP FactoryImpl::CreateInstance(nsISupports *aOuter, const nsIID & iid, void * *result)
