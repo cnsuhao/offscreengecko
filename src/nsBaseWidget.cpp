@@ -937,8 +937,9 @@ nsBaseWidget::debug_GuiEventToString(nsGUIEvent * aGuiEvent)
 
   nsAutoString eventName(NS_LITERAL_STRING("UNKNOWN"));
 
+  // [res]: removed AssignWithConversion
 #define _ASSIGN_eventName(_value,_name)\
-case _value: eventName.AssignWithConversion(_name) ; break
+case _value: eventName.Assign(NS_L(_name)) ; break
 
   switch(aGuiEvent->message)
   {
@@ -992,8 +993,8 @@ case _value: eventName.AssignWithConversion(_name) ; break
       char buf[32];
       
       sprintf(buf,"UNKNOWN: %d",aGuiEvent->message);
-      
-      eventName.AssignWithConversion(buf);
+      // [res]: removed AssignWithConversion      
+      eventName = NS_ConvertASCIItoUTF16 (buf);
     }
     break;
   }
@@ -1171,7 +1172,9 @@ nsBaseWidget::debug_DumpEvent(FILE *                aFileOut,
   if (!debug_GetCachedBoolPref("nglayout.debug.event_dumping"))
     return;
 
-  nsCAutoString tempString; tempString.AssignWithConversion(debug_GuiEventToString(aGuiEvent).get());
+  // [res]: removed AssignWithConversion      
+  nsCAutoString tempString;
+  tempString = NS_ConvertUTF16toUTF8 (debug_GuiEventToString(aGuiEvent).get());
   
   fprintf(aFileOut,
           "%4d %-26s widget=%-8p name=%-12s id=%-8p refpt=%d,%d\n",

@@ -1,5 +1,9 @@
 2007-11-23	Frank Richter	<frank.richter@gmail.com>
 
+* Fixed nsBaseWidget to compile with "embedded" string API in debug builds.
+  
+2007-11-23	Frank Richter	<frank.richter@gmail.com>
+
 * Added CMake files. Switched manually maintained VC project file to a
   generated one.
   
