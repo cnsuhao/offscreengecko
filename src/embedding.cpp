@@ -38,6 +38,7 @@
 #include "embedding.h"
 
 #include GECKO_INCLUDE(embed_base,nsEmbedAPI.h)
+#include GECKO_INCLUDE(xpcom,nsCOMPtr.h)
 #include GECKO_INCLUDE(xpcom,nsIComponentRegistrar.h)
 #include GECKO_INCLUDE(xpcom,nsStringAPI.h)
 #include GECKO_INCLUDE(xpcom,nsXPCOMGlue.h)
@@ -64,17 +65,17 @@ namespace OSGK
         return;
       }
 
-      /* Consider:
-         - Augmenting PATH with GRE path
-         - Test if xul.dll, nspr4.dll can be loaded
-       */
-
       res = XPCOMGlueStartup (grePath);
       if (NS_FAILED (res))
       {
         result = res;
         return;
       }
+
+      /* If the glue started up successfully, the xpcom/xul library was
+         loaded. Thus we should be able to use libxul functions happily
+         past this point.
+       */
 
       xpcom_init_level++;
 
@@ -94,7 +95,21 @@ namespace OSGK
         geckoPath = already_AddRefed<nsILocalFile> (geckoPathPtr);
       }
 
-      if (NS_FAILED (NS_InitEmbedding (geckoPath, 0)))
+      const nsDynamicFunctionLoad xulFuncs[] = {
+        {"XRE_InitEmbedding", (NSFuncPtr*)&XRE_InitEmbedding},
+        {"XRE_TermEmbedding", (NSFuncPtr*)&XRE_TermEmbedding},
+        {0, 0}
+      };
+
+      res = XPCOMGlueLoadXULFunctions (xulFuncs);
+      if (NS_FAILED (res))
+      {
+        result = res;
+        return;
+      }
+
+      res = XRE_InitEmbedding (geckoPath, 0, 0, 0, 0);
+      if (NS_FAILED (res))
       {
         result = res;
         return;
@@ -103,12 +118,14 @@ namespace OSGK
       xpcom_init_level++;
 
       nsCOMPtr<nsIComponentRegistrar> registrar;
-      if (NS_FAILED (NS_GetComponentRegistrar (getter_AddRefs (registrar))))
+      res = NS_GetComponentRegistrar (getter_AddRefs (registrar));
+      if (NS_FAILED (res))
       {
         result = res;
         return;
       }
-      if (NS_FAILED (components.Register (registrar)))
+      res = components.Register (registrar);
+      if (NS_FAILED (res))
       {
         result = res;
         return;
@@ -116,10 +133,11 @@ namespace OSGK
 
       result = NS_OK;
     }
+
     Embedding::~Embedding()
     {
       if (xpcom_init_level >= 2)
-        NS_TermEmbedding ();
+        XRE_TermEmbedding ();
 
       if (xpcom_init_level >= 1)
         XPCOMGlueShutdown ();

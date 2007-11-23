@@ -39,6 +39,8 @@
 
 #include <stdarg.h>
 
+#include GECKO_INCLUDE(xulapp,nsXULAppAPI.h)
+
 #include "OffscreenGecko/embedding.h"
 
 #include "baseobj_private.h"
@@ -52,6 +54,9 @@ namespace OSGK
     {
       int xpcom_init_level;
       OffscreenComponents components;
+
+      XRE_InitEmbeddingType XRE_InitEmbedding;
+      XRE_TermEmbeddingType XRE_TermEmbedding;
     public:
       Embedding (OSGK_GeckoResult& result);
       ~Embedding();
