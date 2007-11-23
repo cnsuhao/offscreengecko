@@ -125,26 +125,9 @@ namespace OSGK
 
         NS_ADDREF(event.widget);
 
-        /*nsRect rect(paintRect.left,
-                    paintRect.top,
-                    paintRect.right - paintRect.left,
-                    paintRect.bottom - paintRect.top);*/
         event.region = nsnull;
-        event.rect = &mBounds; //&rect;
-
-        nsRefPtr<gfxASurface> targetSurface (GetThebesSurface ());
-        nsRefPtr<gfxContext> thebesContext = new gfxContext(targetSurface);
-
-        //if (mIsTranslucent) {
-          // If we're rendering with translucency, we're going to be
-          // rendering the whole window; make sure we clear it first
-          thebesContext->SetOperator(gfxContext::OPERATOR_CLEAR);
-          thebesContext->Paint();
-          thebesContext->SetOperator(gfxContext::OPERATOR_OVER);
-        /*} else {
-          // If we're not doing translucency, then double buffer
-          thebesContext->PushGroup(gfxASurface::CONTENT_COLOR);
-        }*/
+        // @@@ Should use actual dirty area here some time.
+        event.rect = &mBounds;
 
         nsCOMPtr<nsIRenderingContext> rc;
         nsresult rv = mContext->CreateRenderingContextInstance (*getter_AddRefs(rc));
@@ -153,11 +136,21 @@ namespace OSGK
           return NS_ERROR_FAILURE;
         }
 
-        rv = rc->Init(mContext, thebesContext);
+        nsRefPtr<gfxASurface> targetSurface (GetThebesSurface ());
+        rv = rc->Init (mContext, targetSurface);
         if (NS_FAILED(rv)) {
           NS_WARNING("RC::Init failed");
           return NS_ERROR_FAILURE;
         }
+
+        gfxContext* thebesContext = reinterpret_cast<gfxContext*> (
+          rc->GetNativeGraphicData (nsIRenderingContext::NATIVE_THEBES_CONTEXT));
+
+        // We're rendering with translucency, we're going to be
+        // rendering the whole window; make sure we clear it first
+        thebesContext->SetOperator(gfxContext::OPERATOR_CLEAR);
+        thebesContext->Paint();
+        thebesContext->SetOperator(gfxContext::OPERATOR_OVER);
 
         event.renderingContext = rc;
         DispatchEvent (&event, eventStatus);

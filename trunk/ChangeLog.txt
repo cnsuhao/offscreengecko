@@ -1,5 +1,10 @@
 2007-11-23	Frank Richter	<frank.richter@gmail.com>
 
+* Avoid allocating a gfxContext in local code since it'll be freed by libxul,
+  potentially causing a memory allocation module mismatch.
+
+2007-11-23	Frank Richter	<frank.richter@gmail.com>
+
 * Fixes for building against FF3b1 version of Gecko.
   
 2007-11-23	Frank Richter	<frank.richter@gmail.com>
