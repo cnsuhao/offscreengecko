@@ -42,6 +42,9 @@
 #include "EventHelpers.h"
 #include "nsBaseWidget.h"
 
+// FF3b1 Gecko has hat, XULRunner1.9b2pre doesn't
+class nsIMenuListener;
+
 namespace OSGK
 {
   namespace Impl
