@@ -1,3 +1,8 @@
+2007-11-23	Frank Richter	<frank.richter@gmail.com>
+
+* Added CMake files. Switched manually maintained VC project file to a
+  generated one.
+  
 2007-11-22	Frank Richter	<frank.richter@gmail.com>
 
 * Everything: 

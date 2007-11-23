@@ -1,0 +1,17 @@
+# Change a number of MSVC project options to more suitable values.
+
+# Only want Debug and Release.
+SET (CMAKE_CONFIGURATION_TYPES "Debug;Release" CACHE STRING "")
+# Stick to the default.
+SET (CMAKE_CXX_STACK_SIZE "" CACHE STRING "")
+
+# Removed Compiler heap setting; exceptions disabled; RTTI disabled
+SET (CMAKE_CXX_FLAGS "/DWIN32 /D_WINDOWS /W3 /GR-" CACHE STRING "")
+# Enable full debug info
+SET (CMAKE_CXX_FLAGS_DEBUG "/D_DEBUG /MDd /ZI /Ob0 /Od /RTC1" CACHE STRING "")
+# Enable debug info
+SET (CMAKE_CXX_FLAGS_RELEASE " /O2 /Zi" CACHE STRING "")
+# Stick to the defaults, but enable debug info
+SET (CMAKE_SHARED_LINKER_FLAGS "/DEBUG " CACHE STRING "")
+SET (CMAKE_SHARED_LINKER_FLAGS_DEBUG "/INCREMENTAL:YES" CACHE STRING "")
+SET (CMAKE_SHARED_LINKER_FLAGS_RELEASE "/INCREMENTAL:NO" CACHE STRING "")
