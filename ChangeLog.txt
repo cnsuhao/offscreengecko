@@ -1,5 +1,10 @@
 2007-11-23	Frank Richter	<frank.richter@gmail.com>
 
+* When generating VC projects, provide fallback XULrunner SDK location in the
+  source tree (to which the SDK would be extracted to).
+
+2007-11-23	Frank Richter	<frank.richter@gmail.com>
+
 * Replaced use of NS_InitEmbedding/NS_TermEmbedding with
   XRE_InitEmbedding/XRE_TermEmbedding.
 

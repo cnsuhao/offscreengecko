@@ -2,7 +2,9 @@ include_directories(${OffscreenGecko_SOURCE_DIR}/include)
 
 IF(CMAKE_GENERATOR MATCHES "Visual Studio")
   IF(NOT XULRUNNER_SDK_DIR)
-    MESSAGE(SEND_ERROR "XULRUNNER_SDK_DIR variable is not set")
+    set(XULRUNNER_SDK_DIR_DEFAULT "../xulrunner-sdk")
+    MESSAGE("XULRUNNER_SDK_DIR variable is not set; assuming src/${XULRUNNER_SDK_DIR_DEFAULT}")
+    set(XULRUNNER_SDK_DIR "${XULRUNNER_SDK_DIR_DEFAULT}")
   ENDIF(NOT XULRUNNER_SDK_DIR)
 
   include_directories(${XULRUNNER_SDK_DIR}/include)
