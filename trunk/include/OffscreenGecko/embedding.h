@@ -43,10 +43,14 @@
 
 #include "baseobj.h"
 
+/**
+ * Embedding options object. Encapsulates parameters for configuring 
+ * creation and initialization of the embedding environment.
+ */
 typedef OSGK_BaseObject OSGK_EmbeddingOptions;
 
 /**
- * Create a new embedding options object. Encapsulated parameters for
+ * Create a new embedding options object. Encapsulates parameters for
  * configuring creation and initialization of the embedding environment.
  */
 OSGK_EXTERN_C OSGK_API OSGK_EmbeddingOptions* osgk_embedding_options_create (void);
@@ -63,11 +67,14 @@ OSGK_EXTERN_C OSGK_API void osgk_embedding_options_add_search_path (
 
 namespace OSGK
 {
+  /**
+   * Embedding options object. Encapsulates parameters for configuring 
+   * creation and initialization of the embedding environment.
+   */
   struct EmbeddingOptions : public CXXAPI::Wrap<OSGK_EmbeddingOptions>
   {
     /**
-     * Create a new embedding options object. Encapsulated parameters for
-     * configuring creation and initialization of the embedding environment.
+     * Create a new embedding options object. 
      */
     EmbeddingOptions() : WrapperType (osgk_embedding_options_create()) { }
 
@@ -91,6 +98,10 @@ namespace OSGK
 } // namespace OSGK
 #endif
 
+/**
+ * OffscreenGecko embedding object, the 'mother' of all OffscreenGecko
+ * objects.
+ */
 typedef OSGK_BaseObject OSGK_Embedding;
 
 /**

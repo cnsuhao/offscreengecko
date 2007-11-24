@@ -43,6 +43,19 @@
 
 #include "defs.h"
 
+/**\mainpage
+ * This is the OffscreenGecko API documentation.
+ *
+ * Before you hack away make sure to take a look at the 
+ * \ref Basics "object basics".
+ *
+ * If you're programming in C, you may be interested in the 
+ * <a href="globals_func.html">list of functions</a>.
+ *
+ * If you're programmin in C++ instead, you might be more interested in
+ * <a href="annotated.html">the class list</a>.
+ */
+
 /**\page Basics OffscreenGecko object basics
  * The OffscreenGecko API is centered around objects. Whatever you do with it,
  * an object is involved: Initializing the library is equivalent to creating
@@ -124,7 +137,7 @@ namespace OSGK
 {
   namespace CXXAPI
   {
-    /**\internal Wrapper class for all OffscreenGecko objects; automatically
+    /** Wrapper class for all OffscreenGecko objects; automatically
      *   handles reference counting.
      */
     template<typename T>
@@ -175,7 +188,7 @@ namespace OSGK
       /// Directly get the wrapped object.
       T* GetObject() const { return obj; }
     };
-  } // namespace ApiImpl
+  } // namespace CXXAPI
 } // namespace OSGK
 #endif
   

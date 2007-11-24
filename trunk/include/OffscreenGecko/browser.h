@@ -43,6 +43,9 @@
 
 #include "embedding.h"
 
+/**
+ * Browser - encapsulates the display of content.
+ */
 typedef OSGK_BaseObject OSGK_Browser;
 
 /**
@@ -62,6 +65,8 @@ OSGK_EXTERN_C OSGK_API OSGK_Browser* osgk_browser_create (
 OSGK_EXTERN_C OSGK_API void osgk_browser_navigate (OSGK_Browser* browser,
   const char* uri);
 
+/**\name Pixel data acquisition
+ * @{ */
 /**
  * Query if a browser object is 'dirty' (if the displayed data has changed
  * since the last time the data was requested).
@@ -93,6 +98,11 @@ OSGK_EXTERN_C OSGK_API const unsigned char* osgk_browser_lock_data (
 OSGK_EXTERN_C OSGK_API void osgk_browser_unlock_data (OSGK_Browser* browser,
   const unsigned char* data);
 
+/** @} */
+
+/**\name Mouse events
+ * @{ */
+ 
 /// Mouse button ID
 enum OSGK_MouseButton
 {
@@ -134,6 +144,12 @@ OSGK_EXTERN_C OSGK_API void osgk_browser_event_mouse_button (
   OSGK_Browser* browser, OSGK_MouseButton button, 
   OSGK_MouseButtonEventType eventType);
 
+/** @} */
+
+/**\name Keyboard events
+ * \sa \ref KeyboardInputNotes "Keyboard input notes"
+ * @{ */
+ 
 /// Type of keyboard event
 enum OSGK_KeyboardEventType
 {
@@ -205,6 +221,8 @@ OSGK_EXTERN_C OSGK_API int osgk_browser_event_key (
   OSGK_Browser* browser, unsigned int key,
   OSGK_KeyboardEventType eventType);
 
+/** @} */
+
 #ifdef __cplusplus
 namespace OSGK
 {
@@ -239,7 +257,9 @@ namespace OSGK
     {
       osgk_browser_navigate (GetObject(), uri);
     }
-
+    
+    /**\name Pixel data acquisition
+     * @{ */
     /**
      * Query if the browser object is 'dirty' (if the displayed data has changed
      * since the last time the data was requested).
@@ -286,7 +306,10 @@ namespace OSGK
     {
       osgk_browser_unlock_data (GetObject (), data);
     }
+    /** @} */
 
+    /**\name Mouse events
+     * @{ */
     /**
      * Send a mouse move event to the browser object.
      * \param x The X coordinate of the new mouse cursor position.
@@ -307,7 +330,11 @@ namespace OSGK
     {
       osgk_browser_event_mouse_button (GetObject(), button, eventType);
     }
+    /** @} */
 
+    /**\name Keyboard events
+     * \sa \ref KeyboardInputNotes "Keyboard input notes"
+     * @{ */
     /**
      * Send keyboard input to the browser object.
      * \param key The code of the affected key. It can be either one of the 
@@ -320,7 +347,7 @@ namespace OSGK
     {
       return osgk_browser_event_key (GetObject(), key, eventType) != 0;
     }
-
+    /** @} */
   };
   
 } // namespace OSGK
