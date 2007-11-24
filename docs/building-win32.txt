@@ -1,0 +1,39 @@
+BUILDING OFFSCREENGECKO FOR WINDOWS
+
+Prequisites:
+  - Microsoft Visual Studio 2005 SP 1:
+    "Official" builds of XULrunner are built with this compiler. Since
+    OffscreenGecko directly uses some methods from the XULrunner libraries
+    implemented in C++ it's a good idea to match the compilers used for 
+    XULrunner and OffscreenGecko here. The Express Edition is sufficient to
+    build.
+  
+  - cmake:
+    To generate project files (as they depend on local paths). Note that at
+    least cmake 2.4.7 has a bug that prevents certain linker flags from
+    appearing in the generated project files; however, at least version
+    2.5.20071122 works correctly.
+  
+  - A build of Gecko 1.9:
+    This can either be the pre-built XULrunner SDK or any a customized version
+    built from the mozilla.org sources.
+
+Generating projects:
+  If you have all of the above you need to build the MSVC project files for
+  OffscreenGecko. This is done by the "generate-projects.cmd" batch file.
+  
+  To build OffscreenGecko correctly the location of the Gecko 1.9 build must
+  be known:
+   * If you obtained a pre-built XULrunner SDK you can extract it to the
+     "xulrunner-sdk" directory of the OffscreenGecko source tree. The batch
+     will default to that location.
+   * If you already have a pre-built XULrunner SDK, but at some different
+     location, you can specify the path like this:
+       generate-projects.cmd -DXULRUNNER_SDK_DIR=<path-to-xulrunner-sdk>
+   * If you custom-built a mozilla.org application, you can point to 
+     "dist" subdirectory of the build directory as the "XULrunner SDK
+     directory".
+
+Actually building OffscreenGecko:
+  If the prequisites are met and the projects are generated open the solution
+  up in Visual Studio and hit "Build".
