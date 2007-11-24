@@ -38,7 +38,9 @@
 #define __EMBEDDING_H__
 
 #include <stdarg.h>
+#include <vector>
 
+#include GECKO_INCLUDE(xpcom,nsStringAPI.h)
 #include GECKO_INCLUDE(xulapp,nsXULAppAPI.h)
 
 #include "OffscreenGecko/embedding.h"
@@ -50,6 +52,14 @@ namespace OSGK
 {
   namespace Impl
   {
+    class EmbeddingOptions : public BaseObject
+    {
+    public:
+      std::vector<std::string> searchPaths;
+
+      void AddSearchPath (const char* path);
+    };
+
     class Embedding : public BaseObject
     {
       int xpcom_init_level;
@@ -58,7 +68,7 @@ namespace OSGK
       XRE_InitEmbeddingType XRE_InitEmbedding;
       XRE_TermEmbeddingType XRE_TermEmbedding;
     public:
-      Embedding (OSGK_GeckoResult& result);
+      Embedding (EmbeddingOptions* opt, OSGK_GeckoResult& result);
       ~Embedding();
 
       void DebugPrint (const wchar_t* format, ...);
