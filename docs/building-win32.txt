@@ -1,6 +1,6 @@
 BUILDING OFFSCREENGECKO FOR WINDOWS
 
-Prequisites:
+Prerequisites:
   - Microsoft Visual Studio 2005 SP 1:
     "Official" builds of XULrunner are built with this compiler. Since
     OffscreenGecko directly uses some methods from the XULrunner libraries
@@ -35,5 +35,5 @@ Generating projects:
      directory".
 
 Actually building OffscreenGecko:
-  If the prequisites are met and the projects are generated open the solution
+  If the prerequisites are met and the projects are generated open the solution
   up in Visual Studio and hit "Build".
