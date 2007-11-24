@@ -43,6 +43,54 @@
 
 #include "baseobj.h"
 
+typedef OSGK_BaseObject OSGK_EmbeddingOptions;
+
+/**
+ * Create a new embedding options object. Encapsulated parameters for
+ * configuring creation and initialization of the embedding environment.
+ */
+OSGK_EXTERN_C OSGK_API OSGK_EmbeddingOptions* osgk_embedding_options_create (void);
+
+/**
+ * Add a path to be searched for XULrunner upon initialization.
+ * \param options The embedding options object.
+ * \param path Search path to add.
+ */
+OSGK_EXTERN_C OSGK_API void osgk_embedding_options_add_search_path (
+  OSGK_EmbeddingOptions* options, const char* path);
+
+#ifdef __cplusplus
+
+namespace OSGK
+{
+  struct EmbeddingOptions : public CXXAPI::Wrap<OSGK_EmbeddingOptions>
+  {
+    /**
+     * Create a new embedding options object. Encapsulated parameters for
+     * configuring creation and initialization of the embedding environment.
+     */
+    EmbeddingOptions() : WrapperType (osgk_embedding_options_create()) { }
+
+    explicit EmbeddingOptions (WrappedType* obj) : WrapperType (obj) {}
+    EmbeddingOptions& operator=(const EmbeddingOptions& other)
+    {
+      WrapperType::operator=(other);
+      return *this;
+    }
+
+    /**
+     * Add a path to be searched for XULrunner upon initialization.
+     * \param path Search path to add.
+     */
+    void AddSearchPath (const char* path)
+    {
+      osgk_embedding_options_add_search_path (GetObject(), path);
+    }
+  };
+  
+} // namespace OSGK
+#endif
+
 typedef OSGK_BaseObject OSGK_Embedding;
 
 /**
@@ -52,6 +100,15 @@ typedef OSGK_BaseObject OSGK_Embedding;
  */
 OSGK_EXTERN_C OSGK_API OSGK_Embedding* osgk_embedding_create (
   OSGK_GeckoResult* geckoResult OSGK_DEFAULT_ARG(0));
+
+/**
+ * Create a new embedding object. An embedding is the 'mother' of all
+ * OffscreenGecko objects.
+ * \param options A set of options for the embedding to be created.
+ * \param geckoResult Returns the result code from Gecko. Can be 0.
+ */
+OSGK_EXTERN_C OSGK_API OSGK_Embedding* osgk_embedding_create_with_options (
+  OSGK_EmbeddingOptions* options, OSGK_GeckoResult* geckoResult OSGK_DEFAULT_ARG(0));
 
 #ifdef __cplusplus
 
@@ -74,6 +131,20 @@ namespace OSGK
      */
     Embedding (OSGK_GeckoResult& result) : 
       WrapperType (osgk_embedding_create (&result)) { }
+    /**
+     * Create a new embedding object.
+     * \param opt A set of options for the embedding to be created.
+     */
+    Embedding(EmbeddingOptions& opt) : WrapperType (
+      osgk_embedding_create_with_options (opt.GetObject())) { }
+    /**
+     * Create a new embedding object.
+     * \param opt A set of options for the embedding to be created.
+     * \param result Returns the result code from Gecko. Can be 0.
+     */
+    Embedding (EmbeddingOptions& opt, OSGK_GeckoResult& result) : 
+      WrapperType (osgk_embedding_create_with_options (
+        opt.GetObject(), &result)) { }
 
     explicit Embedding (WrappedType* obj) : WrapperType (obj) {}
     Embedding& operator=(const Embedding& other)

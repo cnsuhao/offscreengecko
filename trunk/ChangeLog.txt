@@ -1,5 +1,9 @@
 2007-11-23	Frank Richter	<frank.richter@gmail.com>
 
+* Added support for specifying paths to search for XULrunner.
+
+2007-11-23	Frank Richter	<frank.richter@gmail.com>
+
 * Fix for building against XULrunner SDK 1.9b2pre.
 
 2007-11-23	Frank Richter	<frank.richter@gmail.com>

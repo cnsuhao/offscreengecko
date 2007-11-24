@@ -37,38 +37,109 @@
 #include "defs_private.h"
 #include "embedding.h"
 
+#include <direct.h>
+
 #include GECKO_INCLUDE(embed_base,nsEmbedAPI.h)
 #include GECKO_INCLUDE(xpcom,nsCOMPtr.h)
 #include GECKO_INCLUDE(xpcom,nsIComponentRegistrar.h)
-#include GECKO_INCLUDE(xpcom,nsStringAPI.h)
 #include GECKO_INCLUDE(xpcom,nsXPCOMGlue.h)
 
 namespace OSGK
 {
   namespace Impl
   {
-    Embedding::Embedding (OSGK_GeckoResult& result) : xpcom_init_level (0)
+    void EmbeddingOptions::AddSearchPath (const char* path)
     {
-      static const GREVersionRange supportedGREVersions[] = {
-        {"1.9", true, "2.0", false}
-      };
+      searchPaths.push_back (path);
+    }
 
-      nsresult res;
-      char grePath[MAX_PATH];
-      res = GRE_GetGREPathWithProperties (supportedGREVersions,
-        sizeof (supportedGREVersions) / sizeof (GREVersionRange),
-        0, 0,
-        grePath, sizeof (grePath));
-      if (NS_FAILED (res))
+    //-----------------------------------------------------------------------
+
+    static inline bool IsPathSeparator (unsigned int ch)
+    {
+      return (ch == '/') || (ch == '\\');
+    }
+
+#ifdef _MSC_VER
+#define getcwd  _getcwd
+#define chdir   _chdir
+#endif
+
+    static void PathExpand (std::string& path)
+    {
+#ifdef _MSC_VER
+      char* pathExpanded = _fullpath (0, path.c_str(), 0);
+      path = pathExpanded;
+      free (pathExpanded);
+#else
+      char* saveCwd = getcwd (0, MAX_PATH);
+      chdir (path.c_str());
+      char* newCwd = getcwd (0, MAX_PATH);
+      chdir (saveCwd);
+      path = newCwd;
+      free (saveCwd);
+      free (newCwd);
+#endif
+    }
+
+// From nsXPCOMPrivate.h. Copied here for XPCOM_DLL
+#if defined(XP_WIN) || defined(XP_OS2) || defined(WINCE)
+#define XPCOM_DLL         "xpcom.dll"
+#else // Unix
+#define MOZ_DLL_SUFFIX    ".so"
+#define XPCOM_DLL "libxpcom"MOZ_DLL_SUFFIX
+#endif
+
+#if defined(XP_WIN) || defined(XP_OS2)
+  #define XPCOM_FILE_PATH_SEPARATOR       '\\'
+#else
+  #define XPCOM_FILE_PATH_SEPARATOR       '/'
+#endif
+
+    Embedding::Embedding (EmbeddingOptions* opt, 
+      OSGK_GeckoResult& result) : xpcom_init_level (0)
+    {
+      nsresult xpcomState = NS_ERROR_NOT_AVAILABLE;
+      std::string xpcomPath;
+      if (opt != 0)
       {
-        result = res;
-        return;
+        for (size_t i = 0; i < opt->searchPaths.size(); i++)
+        {
+          std::string path = opt->searchPaths[i];
+          PathExpand (path);
+          if ((path.length() > 0)
+              && (!IsPathSeparator (path[path.length()-1])))
+            path.push_back (XPCOM_FILE_PATH_SEPARATOR);
+          path.append (XPCOM_DLL);
+          xpcomState = XPCOMGlueStartup (path.c_str());
+          if (NS_SUCCEEDED (xpcomState))
+          {
+            xpcomPath = path;
+            break;
+          }
+        }
       }
 
-      res = XPCOMGlueStartup (grePath);
-      if (NS_FAILED (res))
+      if (NS_FAILED (xpcomState))
       {
-        result = res;
+        static const GREVersionRange supportedGREVersions[] = {
+          {"1.9", true, "2.0", false}
+        };
+
+        char grePath[MAX_PATH];
+        nsresult res = GRE_GetGREPathWithProperties (supportedGREVersions,
+          sizeof (supportedGREVersions) / sizeof (GREVersionRange),
+          0, 0,
+          grePath, sizeof (grePath));
+        if (NS_SUCCEEDED (res))
+        {
+          xpcomState = XPCOMGlueStartup (grePath);
+          if (NS_SUCCEEDED (xpcomState)) xpcomPath = grePath;
+        }
+      }
+      if (NS_FAILED (xpcomState))
+      {
+        result = xpcomState;
         return;
       }
 
@@ -79,28 +150,13 @@ namespace OSGK
 
       xpcom_init_level++;
 
-      nsCOMPtr<nsILocalFile> geckoPath;
-      {
-        nsILocalFile* geckoPathPtr = 0;
-        NS_ConvertASCIItoUTF16 greBinDir (grePath);
-#define PATH_SEPARATOR '\\'
-        PRInt32 slashPos = greBinDir.RFindChar (PATH_SEPARATOR);
-        if (slashPos != -1) greBinDir.SetLength (slashPos);
-
-        if (NS_FAILED (NS_NewLocalFile (greBinDir, false, &geckoPathPtr)))
-        {
-          result = res;
-          return;
-        }
-        geckoPath = already_AddRefed<nsILocalFile> (geckoPathPtr);
-      }
-
       const nsDynamicFunctionLoad xulFuncs[] = {
         {"XRE_InitEmbedding", (NSFuncPtr*)&XRE_InitEmbedding},
         {"XRE_TermEmbedding", (NSFuncPtr*)&XRE_TermEmbedding},
         {0, 0}
       };
 
+      nsresult res;
       res = XPCOMGlueLoadXULFunctions (xulFuncs);
       if (NS_FAILED (res))
       {
@@ -108,7 +164,21 @@ namespace OSGK
         return;
       }
 
-      res = XRE_InitEmbedding (geckoPath, 0, 0, 0, 0);
+      nsCOMPtr<nsILocalFile> binPath;
+      {
+        NS_ConvertASCIItoUTF16 greBinDir (xpcomPath.c_str());
+        PRInt32 slashPos = greBinDir.RFindChar (XPCOM_FILE_PATH_SEPARATOR);
+        if (slashPos != -1) greBinDir.SetLength (slashPos);
+
+        res = NS_NewLocalFile (greBinDir, false, getter_AddRefs(binPath));
+        if (NS_FAILED (res))
+        {
+          result = res;
+          return;
+        }
+      }
+
+      res = XRE_InitEmbedding (binPath, 0, 0, 0, 0);
       if (NS_FAILED (res))
       {
         result = res;
@@ -161,11 +231,36 @@ namespace OSGK
   } // namespace Impl
 } // namespace OSGK
 
+OSGK_EmbeddingOptions* osgk_embedding_options_create (void)
+{
+  return new OSGK::Impl::EmbeddingOptions ();
+}
+
+void osgk_embedding_options_add_search_path (OSGK_EmbeddingOptions* options, 
+                                             const char* path)
+{
+  static_cast<OSGK::Impl::EmbeddingOptions*> (options)->AddSearchPath (path);
+}
 
 OSGK_Embedding* osgk_embedding_create (OSGK_GeckoResult* result)
 {
   OSGK_GeckoResult rc;
-  OSGK::Impl::Embedding* e = new OSGK::Impl::Embedding (rc);
+  OSGK::Impl::Embedding* e = new OSGK::Impl::Embedding (0, rc);
+  if (result) *result = rc;
+  if (NS_FAILED(rc))
+  {
+    delete e;
+    return 0;
+  }
+  return e;
+}
+
+OSGK_Embedding* osgk_embedding_create_with_options (
+  OSGK_EmbeddingOptions* options, OSGK_GeckoResult* result)
+{
+  OSGK_GeckoResult rc;
+  OSGK::Impl::Embedding* e = new OSGK::Impl::Embedding (
+    static_cast<OSGK::Impl::EmbeddingOptions*> (options), rc);
   if (result) *result = rc;
   if (NS_FAILED(rc))
   {
