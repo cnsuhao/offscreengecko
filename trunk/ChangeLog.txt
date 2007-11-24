@@ -1,3 +1,7 @@
+2007-11-24	Frank Richter	<frank.richter@gmail.com>
+
+* Switched VC runtime library to static version.
+
 2007-11-23	Frank Richter	<frank.richter@gmail.com>
 
 * Added support for specifying paths to search for XULrunner.
