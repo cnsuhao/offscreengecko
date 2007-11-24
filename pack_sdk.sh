@@ -14,8 +14,6 @@ TOP="`pwd`"
 mkdir -p ${WORKDIR}/${PACKAGE}/bin
 cp out/release/OffscreenGecko.dll ${WORKDIR}/${PACKAGE}/bin
 cp out/release/OffscreenGecko.pdb ${WORKDIR}/${PACKAGE}/bin
-cp ${TOP}/sdk/win32/*.dll ${WORKDIR}/${PACKAGE}/bin
-cp ${TOP}/sdk/win32/*.manifest ${WORKDIR}/${PACKAGE}/bin
 mkdir -p ${WORKDIR}/${PACKAGE}/lib
 cp out/release/OffscreenGecko.lib ${WORKDIR}/${PACKAGE}/lib
 ${TOP}/bin/ignorantcopy.sh include/OffscreenGecko ${WORKDIR}/${PACKAGE}/include/OffscreenGecko
