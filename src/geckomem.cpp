@@ -34,59 +34,41 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-#ifndef __EMBEDDING_H__
-#define __EMBEDDING_H__
+#include "xpcom/nsMemory.h"
 
-#include <stdarg.h>
-#include <vector>
+#include "OffscreenGecko/geckomem.h"
 
-#include GECKO_INCLUDE(xpcom,nsStringAPI.h)
-#include GECKO_INCLUDE(xulapp,nsXULAppAPI.h)
-
-#include "OffscreenGecko/embedding.h"
-
-#include "baseobj_private.h"
-#include "DirectoryService.h"
-#include "OffscreenComponents.h"
 #include "geckomem.h"
-#include "ref.h"
 
 namespace OSGK
 {
   namespace Impl
   {
-    class EmbeddingOptions : public BaseObject
+    void* GeckoMem::Alloc (size_t size)
     {
-      nsRefPtr<DirectoryService> directoryService;
-    public:
-      std::vector<std::string> searchPaths;
-
-      void AddSearchPath (const char* path);
-      void AddComponentsPath (const char* path);
-
-      nsIDirectoryServiceProvider* GetDirectoryService ()
-      { return directoryService; }
-    };
-
-    class Embedding : public BaseObject
+      return nsMemory::Alloc (size);
+    }
+    void GeckoMem::Free (void* p)
     {
-      int xpcom_init_level;
-      OffscreenComponents components;
-
-      XRE_InitEmbeddingType XRE_InitEmbedding;
-      XRE_TermEmbeddingType XRE_TermEmbedding;
-
-      Ref<GeckoMem> geckoMem;
-    public:
-      Embedding (EmbeddingOptions* opt, OSGK_GeckoResult& result);
-      ~Embedding();
-
-      GeckoMem* GetGeckoMem ();
-
-      void DebugPrint (const wchar_t* format, ...);
-      void DebugPrintV (const wchar_t* format, va_list args);
-    };
+      return nsMemory::Free (p);
+    }
+    void* GeckoMem::Realloc (void* p, size_t size)
+    {
+      return nsMemory::Realloc (p, size);
+    }
   } // namespace Impl
 } // namespace OSGK
 
-#endif // __EMBEDDING_H__
+
+void* osgk_geckomem_alloc (OSGK_GeckoMem* mem, size_t size)
+{
+  return static_cast<OSGK::Impl::GeckoMem*> (mem)->Alloc (size);
+}
+void osgk_geckomem_free (OSGK_GeckoMem* mem, void* p)
+{
+  static_cast<OSGK::Impl::GeckoMem*> (mem)->Free (p);
+}
+void* osgk_geckomem_realloc (OSGK_GeckoMem* mem, void* p, size_t size)
+{
+  return static_cast<OSGK::Impl::GeckoMem*> (mem)->Realloc (p, size);
+}

@@ -42,6 +42,7 @@
  */
 
 #include "baseobj.h"
+#include "geckomem.h"
 
 /**
  * Embedding options object. Encapsulates parameters for configuring 
@@ -138,6 +139,15 @@ OSGK_EXTERN_C OSGK_API OSGK_Embedding* osgk_embedding_create (
 OSGK_EXTERN_C OSGK_API OSGK_Embedding* osgk_embedding_create_with_options (
   OSGK_EmbeddingOptions* options, OSGK_GeckoResult* geckoResult OSGK_DEFAULT_ARG(0));
 
+/**
+ * Get Gecko memory allocator object.
+ * \param embedding Embedding object.
+ * \return Pointer to Gecko memory allocator object.
+ * \remarks The returned object has <b>no reference implicitly added</b>.
+ */
+OSGK_EXTERN_C OSGK_API OSGK_GeckoMem* osgk_embedding_get_gecko_mem (
+  OSGK_Embedding* embedding);
+
 #ifdef __cplusplus
 
 namespace OSGK
@@ -180,6 +190,20 @@ namespace OSGK
       WrapperType::operator=(other);
       return *this;
     }
+
+    /**
+     * Get Gecko memory allocator object.
+     */
+    GeckoMem GetGeckoMem ()
+    {
+      OSGK_GeckoMem* geckoMem = 
+        osgk_embedding_get_gecko_mem (GetObject ());
+      /* A reference to geckoMem was *not* implicitly added. Add one so the 
+         wrapper works right */
+      osgk_addref (geckoMem);
+      return GeckoMem (geckoMem);
+    }
+    
   };
   
 } // namespace OSGK

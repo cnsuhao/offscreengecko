@@ -34,59 +34,24 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-#ifndef __EMBEDDING_H__
-#define __EMBEDDING_H__
-
-#include <stdarg.h>
-#include <vector>
-
-#include GECKO_INCLUDE(xpcom,nsStringAPI.h)
-#include GECKO_INCLUDE(xulapp,nsXULAppAPI.h)
-
-#include "OffscreenGecko/embedding.h"
+#ifndef __GECKOMEM_H__
+#define __GECKOMEM_H__
 
 #include "baseobj_private.h"
-#include "DirectoryService.h"
-#include "OffscreenComponents.h"
-#include "geckomem.h"
-#include "ref.h"
 
 namespace OSGK
 {
   namespace Impl
   {
-    class EmbeddingOptions : public BaseObject
+    class GeckoMem : public BaseObject
     {
-      nsRefPtr<DirectoryService> directoryService;
     public:
-      std::vector<std::string> searchPaths;
-
-      void AddSearchPath (const char* path);
-      void AddComponentsPath (const char* path);
-
-      nsIDirectoryServiceProvider* GetDirectoryService ()
-      { return directoryService; }
-    };
-
-    class Embedding : public BaseObject
-    {
-      int xpcom_init_level;
-      OffscreenComponents components;
-
-      XRE_InitEmbeddingType XRE_InitEmbedding;
-      XRE_TermEmbeddingType XRE_TermEmbedding;
-
-      Ref<GeckoMem> geckoMem;
-    public:
-      Embedding (EmbeddingOptions* opt, OSGK_GeckoResult& result);
-      ~Embedding();
-
-      GeckoMem* GetGeckoMem ();
-
-      void DebugPrint (const wchar_t* format, ...);
-      void DebugPrintV (const wchar_t* format, va_list args);
+      void* Alloc (size_t size);
+      void Free (void* p);
+      void* Realloc (void* p, size_t size);
     };
   } // namespace Impl
 } // namespace OSGK
 
-#endif // __EMBEDDING_H__
+
+#endif // __GECKOMEM_H__
