@@ -1,5 +1,9 @@
 2007-11-25	Frank Richter	<frank.richter@gmail.com>
 
+* Added a "string" object, used when strings are returned from OffscreenGecko.
+
+2007-11-25	Frank Richter	<frank.richter@gmail.com>
+
 * Fixed a cut'n'paste error in OSGK::Impl::Ref<> causing AttachNew() to do
   the opposite of what it was supposed to do (not adding a ref).
 
