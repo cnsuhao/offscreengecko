@@ -44,6 +44,7 @@
 #include "baseobj.h"
 #include "componentmgr.h"
 #include "geckomem.h"
+#include "string.h"
 
 /**
  * Embedding options object. Encapsulates parameters for configuring 
@@ -187,6 +188,31 @@ osgk_embedding_get_gecko_component_registrar (OSGK_Embedding* embedding);
 OSGK_EXTERN_C OSGK_API OSGK_CLASSTYPE_REF nsIServiceManager* 
 osgk_embedding_get_gecko_service_manager (OSGK_Embedding* embedding);
 
+// @@@ Right place?
+/// Flags for JavaScript global registration
+enum
+{
+  /// Global is only accessible from privileged scripts
+  jsgPrivileged = 1
+};
+/**
+ * Register a global object for JavaScript scripting.
+ * \param embedding Embedding object.
+ * \param name Identifier of the global object.
+ * \param contractID Contract ID used to instantiate the object.
+ * \param flags Registration flags.
+ * \param previousContract Optionally receives a previously registered
+ *   contract ID for the given identifier.
+ * \param geckoResult Optionally receives the Gecko result code for the
+ *   registration.
+ * \return Whether the registration was successful (non-null) or not (null).
+ * \sa #jsgPrivileged
+ */
+OSGK_EXTERN_C OSGK_API int osgk_embedding_register_js_global (
+  OSGK_Embedding* embedding, const char* name, const char* contractID,
+  unsigned int flags, OSGK_String** previousContract OSGK_DEFAULT_ARG(0),
+  OSGK_GeckoResult* geckoResult OSGK_DEFAULT_ARG(0));
+
 #ifdef __cplusplus
 
 namespace OSGK
@@ -283,6 +309,76 @@ namespace OSGK
     {
       return osgk_embedding_get_gecko_service_manager (GetObject ());
     }
+
+    /**
+     * Register a global object for JavaScript scripting.
+     * \param name Identifier of the global object.
+     * \param contractID Contract ID used to instantiate the object.
+     * \param flags Registration flags.
+     * \return Whether the registration was successful (true) or not (false).
+     * \sa #jsgPrivileged
+     */
+    bool RegisterJSGlobal (const char* name, const char* contractID,
+      unsigned int flags)
+    {
+      return osgk_embedding_register_js_global (GetObject(), name,
+	contractID, flags) != 0;
+    }
+    /**
+     * Register a global object for JavaScript scripting.
+     * \param name Identifier of the global object.
+     * \param contractID Contract ID used to instantiate the object.
+     * \param flags Registration flags.
+     * \param previous Receives a previously registered contract ID for the 
+     *   given identifier.
+     * \return Whether the registration was successful (true) or not (false).
+     * \sa #jsgPrivileged
+     */
+    bool RegisterJSGlobal (const char* name, const char* contractID,
+      unsigned int flags, String& previous)
+    {
+      OSGK_String* str;
+      bool ret = osgk_embedding_register_js_global (GetObject(), name,
+	contractID, flags, &str) != 0;
+      previous = String (str);
+      return ret;
+    }
+    /**
+     * Register a global object for JavaScript scripting.
+     * \param name Identifier of the global object.
+     * \param contractID Contract ID used to instantiate the object.
+     * \param flags Registration flags.
+     * \param geckoResult Receives the Gecko result code for the registration.
+     * \return Whether the registration was successful (true) or not (false).
+     * \sa #jsgPrivileged
+     */
+    bool RegisterJSGlobal (const char* name, const char* contractID,
+      unsigned int flags, OSGK_GeckoResult& geckoResult)
+    {
+      return osgk_embedding_register_js_global (GetObject(), name,
+	contractID, flags, 0, &geckoResult) != 0;
+    }
+    /**
+     * Register a global object for JavaScript scripting.
+     * \param name Identifier of the global object.
+     * \param contractID Contract ID used to instantiate the object.
+     * \param flags Registration flags.
+     * \param previous Receives a previously registered contract ID for the 
+     *   given identifier.
+     * \param geckoResult Receives the Gecko result code for the registration.
+     * \return Whether the registration was successful (true) or not (false).
+     * \sa #jsgPrivileged
+     */
+    bool RegisterJSGlobal (const char* name, const char* contractID,
+      unsigned int flags, String& previous, OSGK_GeckoResult& geckoResult)
+    {
+      OSGK_String* str;
+      bool ret = osgk_embedding_register_js_global (GetObject(), name,
+	contractID, flags, &str, &geckoResult) != 0;
+      previous = String (str);
+      return ret;
+    }
+    
   };
   
 } // namespace OSGK
