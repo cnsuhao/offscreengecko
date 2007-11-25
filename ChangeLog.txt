@@ -1,5 +1,10 @@
 2007-11-25	Frank Richter	<frank.richter@gmail.com>
 
+* Fixed a cut'n'paste error in OSGK::Impl::Ref<> causing AttachNew() to do
+  the opposite of what it was supposed to do (not adding a ref).
+
+2007-11-25	Frank Richter	<frank.richter@gmail.com>
+
 * Added ability to specify additional XPCOM components paths.
 
 2007-11-24	Frank Richter	<frank.richter@gmail.com>
