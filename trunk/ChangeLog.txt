@@ -1,5 +1,10 @@
 2007-11-25	Frank Richter	<frank.richter@gmail.com>
 
+* Added a wrapper object to allow access to Gecko memory allocation without
+  having to necessarily link against XPCOM.
+
+2007-11-25	Frank Richter	<frank.richter@gmail.com>
+
 * Added a "string" object, used when strings are returned from OffscreenGecko.
 
 2007-11-25	Frank Richter	<frank.richter@gmail.com>

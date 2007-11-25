@@ -188,6 +188,13 @@ namespace OSGK
         XPCOMGlueShutdown ();
     }
 
+    GeckoMem* Embedding::GetGeckoMem ()
+    {
+      if (!geckoMem)
+        geckoMem.AttachNew (new GeckoMem);
+      return geckoMem;
+    }
+
     void Embedding::DebugPrint (const wchar_t* format, ...)
     {
       va_list args;
@@ -249,4 +256,9 @@ OSGK_Embedding* osgk_embedding_create_with_options (
     return 0;
   }
   return e;
+}
+
+OSGK_GeckoMem* osgk_embedding_get_gecko_mem (OSGK_Embedding* embedding)
+{
+  return static_cast<OSGK::Impl::Embedding*> (embedding)->GetGeckoMem ();
 }
