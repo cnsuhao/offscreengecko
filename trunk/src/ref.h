@@ -89,7 +89,6 @@ namespace OSGK
       OSGK_ASSERT(obj != this->obj);
       if (this->obj != 0) this->obj->Release ();
       this->obj = obj;
-      if (obj != 0) obj->AddRef ();
     }
   };
 } // namespace OSGK
