@@ -38,11 +38,14 @@
 #include "embedding.h"
 #include "pathutil.h"
 
+#include GECKO_INCLUDE(dom,nsIScriptNameSpaceManager.h)
 #include GECKO_INCLUDE(embed_base,nsEmbedAPI.h)
 #include GECKO_INCLUDE(xpcom,nsCOMPtr.h)
+#include GECKO_INCLUDE(xpcom,nsICategoryManager.h)
 #include GECKO_INCLUDE(xpcom,nsIComponentManager.h)
 #include GECKO_INCLUDE(xpcom,nsIComponentRegistrar.h)
 #include GECKO_INCLUDE(xpcom,nsIServiceManager.h)
+#include GECKO_INCLUDE(xpcom,nsServiceManagerUtils.h)
 #include GECKO_INCLUDE(xpcom,nsXPCOMGlue.h)
 
 namespace OSGK
@@ -239,6 +242,27 @@ namespace OSGK
       return GetRefKeeper().nsServMgr;
     }
 
+    nsresult Embedding::RegisterJSGlobal (const char* name, 
+      const char* contractID, unsigned int flags, BaseString*& previous)
+    {
+      nsCOMPtr<nsICategoryManager> catman =
+        do_GetService (NS_CATEGORYMANAGER_CONTRACTID);
+      if (!catman)
+        return NS_ERROR_FAILURE;
+
+      const char* category = (flags & jsgPrivileged) 
+        ? JAVASCRIPT_GLOBAL_PRIVILEGED_PROPERTY_CATEGORY
+        : JAVASCRIPT_GLOBAL_PROPERTY_CATEGORY;
+
+      Str_WrapNSCStr* prev_ws = new Str_WrapNSCStr;
+      nsresult rc = catman->AddCategoryEntry(category,
+        name, contractID, PR_TRUE, PR_TRUE, 
+        getter_Copies (prev_ws->GetNSCStr()));
+      previous = prev_ws;
+
+      return rc;
+    }
+
     void Embedding::DebugPrint (const wchar_t* format, ...)
     {
       va_list args;
@@ -327,3 +351,17 @@ nsIServiceManager* osgk_embedding_get_gecko_service_manager (OSGK_Embedding* emb
   return static_cast<OSGK::Impl::Embedding*> (embedding)->GetGeckoServiceManager ();
 }
 
+int osgk_embedding_register_js_global (OSGK_Embedding* embedding, 
+  const char* name, const char* contractID, unsigned int flags, 
+  OSGK_String** previousContract, OSGK_GeckoResult* geckoResult)
+{
+  OSGK::Impl::BaseString* prevStr = 0;
+  nsresult rc = static_cast<OSGK::Impl::Embedding*> (embedding)->RegisterJSGlobal (
+    name, contractID, flags, prevStr);
+  if (previousContract != 0)
+    *previousContract = prevStr;
+  else
+    delete prevStr;
+  if (geckoResult != 0) *geckoResult = rc;
+  return NS_SUCCEEDED(rc);
+}

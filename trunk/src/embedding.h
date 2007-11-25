@@ -51,6 +51,7 @@
 #include "OffscreenComponents.h"
 #include "geckomem.h"
 #include "ref.h"
+#include "string.h"
 
 namespace OSGK
 {
@@ -99,6 +100,9 @@ namespace OSGK
       nsIComponentManager* GetGeckoComponentManager ();
       nsIComponentRegistrar*  GetGeckoComponentRegistrar ();
       nsIServiceManager* GetGeckoServiceManager ();
+
+      nsresult RegisterJSGlobal (const char* name, const char* contractID,
+        unsigned int flags, BaseString*& previous);
 
       void DebugPrint (const wchar_t* format, ...);
       void DebugPrintV (const wchar_t* format, va_list args);
