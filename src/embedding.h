@@ -46,6 +46,7 @@
 #include "OffscreenGecko/embedding.h"
 
 #include "baseobj_private.h"
+#include "componentmgr.h"
 #include "DirectoryService.h"
 #include "OffscreenComponents.h"
 #include "geckomem.h"
@@ -76,12 +77,28 @@ namespace OSGK
       XRE_InitEmbeddingType XRE_InitEmbedding;
       XRE_TermEmbeddingType XRE_TermEmbedding;
 
-      Ref<GeckoMem> geckoMem;
+      struct RefKeeper
+      {
+        Ref<GeckoMem> geckoMem;
+        Ref<ComponentMgr> compMgr;
+        nsCOMPtr<nsIComponentManager> nsCompMgr;
+        nsCOMPtr<nsIComponentRegistrar> nsCompReg;
+        nsCOMPtr<nsIServiceManager> nsServMgr;
+      };
+      void* refKeeperStorage[(sizeof (RefKeeper) + sizeof (void*) - 1) / sizeof (void*)];
+      inline RefKeeper& GetRefKeeper()
+      { return *(reinterpret_cast<RefKeeper*> (refKeeperStorage)); }
     public:
       Embedding (EmbeddingOptions* opt, OSGK_GeckoResult& result);
       ~Embedding();
 
       GeckoMem* GetGeckoMem ();
+
+      ComponentMgr* GetComponentMgr ();
+
+      nsIComponentManager* GetGeckoComponentManager ();
+      nsIComponentRegistrar*  GetGeckoComponentRegistrar ();
+      nsIServiceManager* GetGeckoServiceManager ();
 
       void DebugPrint (const wchar_t* format, ...);
       void DebugPrintV (const wchar_t* format, va_list args);

@@ -1079,7 +1079,9 @@ PREDEFINED             = __cplusplus	\
 # The macro definition that is found in the sources will be used. 
 # Use the PREDEFINED tag if you want to use a different macro definition.
 
-EXPAND_AS_DEFINED      = OSGK_DEFAULT_ARG
+EXPAND_AS_DEFINED      = OSGK_DEFAULT_ARG	\
+			 OSGK_CLASSTYPE_DEF	\
+			 OSGK_CLASSTYPE_REF
 
 # If the SKIP_FUNCTION_MACROS tag is set to YES (the default) then 
 # doxygen's preprocessor will remove all function-like macros that are alone 

@@ -40,7 +40,9 @@
 
 #include GECKO_INCLUDE(embed_base,nsEmbedAPI.h)
 #include GECKO_INCLUDE(xpcom,nsCOMPtr.h)
+#include GECKO_INCLUDE(xpcom,nsIComponentManager.h)
 #include GECKO_INCLUDE(xpcom,nsIComponentRegistrar.h)
+#include GECKO_INCLUDE(xpcom,nsIServiceManager.h)
 #include GECKO_INCLUDE(xpcom,nsXPCOMGlue.h)
 
 namespace OSGK
@@ -73,6 +75,8 @@ namespace OSGK
     Embedding::Embedding (EmbeddingOptions* opt, 
       OSGK_GeckoResult& result) : xpcom_init_level (0)
     {
+      new (&GetRefKeeper()) RefKeeper;
+
       nsresult xpcomState = NS_ERROR_NOT_AVAILABLE;
       std::string xpcomPath;
       if (opt != 0)
@@ -162,14 +166,30 @@ namespace OSGK
 
       xpcom_init_level++;
 
-      nsCOMPtr<nsIComponentRegistrar> registrar;
-      res = NS_GetComponentRegistrar (getter_AddRefs (registrar));
+      res = NS_GetServiceManager (
+        getter_AddRefs (GetRefKeeper().nsServMgr));
       if (NS_FAILED (res))
       {
         result = res;
         return;
       }
-      res = components.Register (registrar);
+
+      res = NS_GetComponentManager (
+        getter_AddRefs (GetRefKeeper().nsCompMgr));
+      if (NS_FAILED (res))
+      {
+        result = res;
+        return;
+      }
+
+      res = NS_GetComponentRegistrar (
+        getter_AddRefs (GetRefKeeper().nsCompReg));
+      if (NS_FAILED (res))
+      {
+        result = res;
+        return;
+      }
+      res = components.Register (GetRefKeeper().nsCompReg);
       if (NS_FAILED (res))
       {
         result = res;
@@ -181,6 +201,8 @@ namespace OSGK
 
     Embedding::~Embedding()
     {
+      GetRefKeeper().~RefKeeper();
+
       if (xpcom_init_level >= 2)
         XRE_TermEmbedding ();
 
@@ -190,9 +212,31 @@ namespace OSGK
 
     GeckoMem* Embedding::GetGeckoMem ()
     {
-      if (!geckoMem)
-        geckoMem.AttachNew (new GeckoMem);
-      return geckoMem;
+      if (!GetRefKeeper().geckoMem)
+        GetRefKeeper().geckoMem.AttachNew (new GeckoMem);
+      return GetRefKeeper().geckoMem;
+    }
+
+    ComponentMgr* Embedding::GetComponentMgr ()
+    {
+      if (!GetRefKeeper().compMgr)
+        GetRefKeeper().compMgr.AttachNew (new ComponentMgr);
+      return GetRefKeeper().compMgr;
+    }
+
+    nsIComponentManager* Embedding::GetGeckoComponentManager ()
+    {
+      return GetRefKeeper().nsCompMgr;
+    }
+
+    nsIComponentRegistrar* Embedding::GetGeckoComponentRegistrar ()
+    {
+      return GetRefKeeper().nsCompReg;
+    }
+
+    nsIServiceManager* Embedding::GetGeckoServiceManager ()
+    {
+      return GetRefKeeper().nsServMgr;
     }
 
     void Embedding::DebugPrint (const wchar_t* format, ...)
@@ -262,3 +306,24 @@ OSGK_GeckoMem* osgk_embedding_get_gecko_mem (OSGK_Embedding* embedding)
 {
   return static_cast<OSGK::Impl::Embedding*> (embedding)->GetGeckoMem ();
 }
+
+OSGK_ComponentMgr* osgk_embedding_get_component_mgr (OSGK_Embedding* embedding)
+{
+  return static_cast<OSGK::Impl::Embedding*> (embedding)->GetComponentMgr ();
+}
+
+nsIComponentManager* osgk_embedding_get_gecko_component_manager (OSGK_Embedding* embedding)
+{
+  return static_cast<OSGK::Impl::Embedding*> (embedding)->GetGeckoComponentManager ();
+}
+
+nsIComponentRegistrar* osgk_embedding_get_gecko_component_registrar (OSGK_Embedding* embedding)
+{
+  return static_cast<OSGK::Impl::Embedding*> (embedding)->GetGeckoComponentRegistrar ();
+}
+
+nsIServiceManager* osgk_embedding_get_gecko_service_manager (OSGK_Embedding* embedding)
+{
+  return static_cast<OSGK::Impl::Embedding*> (embedding)->GetGeckoServiceManager ();
+}
+

@@ -42,6 +42,7 @@
  */
 
 #include "baseobj.h"
+#include "componentmgr.h"
 #include "geckomem.h"
 
 /**
@@ -148,6 +149,44 @@ OSGK_EXTERN_C OSGK_API OSGK_Embedding* osgk_embedding_create_with_options (
 OSGK_EXTERN_C OSGK_API OSGK_GeckoMem* osgk_embedding_get_gecko_mem (
   OSGK_Embedding* embedding);
 
+/**
+ * Get Gecko component manager wrapper.
+ * \param embedding Embedding object.
+ * \return Pointer to Gecko component manager wrapper.
+ * \remarks The returned object has <b>no reference implicitly added</b>.
+ */
+OSGK_EXTERN_C OSGK_API OSGK_ComponentMgr* osgk_embedding_get_component_mgr (
+  OSGK_Embedding* embedding);
+
+OSGK_CLASSTYPE_DEF nsIComponentManager;
+OSGK_CLASSTYPE_DEF nsIComponentRegistrar;
+OSGK_CLASSTYPE_DEF nsIServiceManager;
+
+/**
+ * Get interface for actual Gecko component manager.
+ * \param embedding Embedding object.
+ * \return Interface of Gecko component manager.
+ * \remarks The returned interface has <b>no reference implicitly added</b>.
+ */
+OSGK_EXTERN_C OSGK_API OSGK_CLASSTYPE_REF nsIComponentManager* 
+osgk_embedding_get_gecko_component_manager (OSGK_Embedding* embedding);
+/**
+ * Get interface for actual Gecko component registrar.
+ * \param embedding Embedding object.
+ * \return Interface of Gecko component registrar.
+ * \remarks The returned interface has <b>no reference implicitly added</b>.
+ */
+OSGK_EXTERN_C OSGK_API OSGK_CLASSTYPE_REF nsIComponentRegistrar* 
+osgk_embedding_get_gecko_component_registrar (OSGK_Embedding* embedding);
+/**
+ * Get interface for actual Gecko service manager.
+ * \param embedding Embedding object.
+ * \return Interface of Gecko service manager.
+ * \remarks The returned interface has <b>no reference implicitly added</b>.
+ */
+OSGK_EXTERN_C OSGK_API OSGK_CLASSTYPE_REF nsIServiceManager* 
+osgk_embedding_get_gecko_service_manager (OSGK_Embedding* embedding);
+
 #ifdef __cplusplus
 
 namespace OSGK
@@ -204,6 +243,46 @@ namespace OSGK
       return GeckoMem (geckoMem);
     }
     
+    /**
+     * Get Gecko component manager wrapper.
+     */
+    ComponentMgr GetComponentMgr()
+    {
+      OSGK_ComponentMgr* compMgr = 
+        osgk_embedding_get_component_mgr (GetObject ());
+      /* A reference to compMgr was *not* implicitly added. Add one so the 
+         wrapper works right */
+      osgk_addref (compMgr);
+      return ComponentMgr (compMgr);
+    }
+    
+    /**
+     * Get interface for actual Gecko component manager.
+     * \return Interface of Gecko component manager.
+     * \remarks The returned interface has <b>no reference implicitly added</b>.
+     */
+    nsIComponentManager* GetGeckoComponentManager ()
+    {
+      return osgk_embedding_get_gecko_component_manager (GetObject());
+    }
+    /**
+     * Get interface for actual Gecko component registrar.
+     * \return Interface of Gecko component registrar.
+     * \remarks The returned interface has <b>no reference implicitly added</b>.
+     */
+    nsIComponentRegistrar*  GetGeckoComponentRegistrar ()
+    {
+      return osgk_embedding_get_gecko_component_registrar (GetObject ());
+    }
+    /**
+     * Get interface for actual Gecko service manager.
+     * \return Interface of Gecko service manager.
+     * \remarks The returned interface has <b>no reference implicitly added</b>.
+     */
+    nsIServiceManager* GetGeckoServiceManager ()
+    {
+      return osgk_embedding_get_gecko_service_manager (GetObject ());
+    }
   };
   
 } // namespace OSGK

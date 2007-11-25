@@ -1,5 +1,11 @@
 2007-11-25	Frank Richter	<frank.richter@gmail.com>
 
+* Added a wrapper for the Gecko component manager (the idea is to make common
+  component manager/registrar tasks more convenient) as well as getters for
+  the actual Gecko component manager, component registrar and service manager.
+
+2007-11-25	Frank Richter	<frank.richter@gmail.com>
+
 * Added a wrapper object to allow access to Gecko memory allocation without
   having to necessarily link against XPCOM.
 

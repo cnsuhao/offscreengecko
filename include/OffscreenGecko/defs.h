@@ -44,9 +44,13 @@
 #ifdef __cplusplus
 #  define OSGK_EXTERN_C		extern "C"
 #  define OSGK_DEFAULT_ARG(X)	= X
+#  define OSGK_CLASSTYPE_DEF	class
+#  define OSGK_CLASSTYPE_REF
 #else
 #  define OSGK_EXTERN_C	extern
 #  define OSGK_DEFAULT_ARG(X)
+#  define OSGK_CLASSTYPE_DEF	struct
+#  define OSGK_CLASSTYPE_REF	struct
 #endif
 
 #ifdef WIN32
