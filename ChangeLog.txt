@@ -1,3 +1,7 @@
+2007-11-25	Frank Richter	<frank.richter@gmail.com>
+
+* Added ability to specify additional XPCOM components paths.
+
 2007-11-24	Frank Richter	<frank.richter@gmail.com>
 
 * Switched VC runtime library to static version.

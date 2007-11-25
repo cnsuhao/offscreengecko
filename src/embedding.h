@@ -46,6 +46,7 @@
 #include "OffscreenGecko/embedding.h"
 
 #include "baseobj_private.h"
+#include "DirectoryService.h"
 #include "OffscreenComponents.h"
 
 namespace OSGK
@@ -54,10 +55,15 @@ namespace OSGK
   {
     class EmbeddingOptions : public BaseObject
     {
+      nsRefPtr<DirectoryService> directoryService;
     public:
       std::vector<std::string> searchPaths;
 
       void AddSearchPath (const char* path);
+      void AddComponentsPath (const char* path);
+
+      nsIDirectoryServiceProvider* GetDirectoryService ()
+      { return directoryService; }
     };
 
     class Embedding : public BaseObject

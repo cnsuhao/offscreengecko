@@ -63,6 +63,14 @@ OSGK_EXTERN_C OSGK_API OSGK_EmbeddingOptions* osgk_embedding_options_create (voi
 OSGK_EXTERN_C OSGK_API void osgk_embedding_options_add_search_path (
   OSGK_EmbeddingOptions* options, const char* path);
 
+/**
+ * Add a path with application-specific XPCOM components and type libraries.
+ * \param options The embedding options object.
+ * \param path Components path to add.
+ */
+OSGK_EXTERN_C OSGK_API void osgk_embedding_options_add_components_path (
+  OSGK_EmbeddingOptions* options, const char* path);
+
 #ifdef __cplusplus
 
 namespace OSGK
@@ -92,6 +100,15 @@ namespace OSGK
     void AddSearchPath (const char* path)
     {
       osgk_embedding_options_add_search_path (GetObject(), path);
+    }
+
+    /**
+     * Add a path with application-specific XPCOM components and type libraries.
+     * \param path Components path to add.
+     */
+    void AddComponentsPath (const char* path)
+    {
+      osgk_embedding_options_add_components_path (GetObject(), path);
     }
   };
   

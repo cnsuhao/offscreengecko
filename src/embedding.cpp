@@ -36,8 +36,7 @@
 
 #include "defs_private.h"
 #include "embedding.h"
-
-#include <direct.h>
+#include "pathutil.h"
 
 #include GECKO_INCLUDE(embed_base,nsEmbedAPI.h)
 #include GECKO_INCLUDE(xpcom,nsCOMPtr.h)
@@ -53,34 +52,15 @@ namespace OSGK
       searchPaths.push_back (path);
     }
 
+    void EmbeddingOptions::AddComponentsPath (const char* path)
+    {
+      if (!directoryService)
+        directoryService = new DirectoryService;
+
+      directoryService->AddComponentsPath (path);
+    }
+
     //-----------------------------------------------------------------------
-
-    static inline bool IsPathSeparator (unsigned int ch)
-    {
-      return (ch == '/') || (ch == '\\');
-    }
-
-#ifdef _MSC_VER
-#define getcwd  _getcwd
-#define chdir   _chdir
-#endif
-
-    static void PathExpand (std::string& path)
-    {
-#ifdef _MSC_VER
-      char* pathExpanded = _fullpath (0, path.c_str(), 0);
-      path = pathExpanded;
-      free (pathExpanded);
-#else
-      char* saveCwd = getcwd (0, MAX_PATH);
-      chdir (path.c_str());
-      char* newCwd = getcwd (0, MAX_PATH);
-      chdir (saveCwd);
-      path = newCwd;
-      free (saveCwd);
-      free (newCwd);
-#endif
-    }
 
 // From nsXPCOMPrivate.h. Copied here for XPCOM_DLL
 #if defined(XP_WIN) || defined(XP_OS2) || defined(WINCE)
@@ -88,12 +68,6 @@ namespace OSGK
 #else // Unix
 #define MOZ_DLL_SUFFIX    ".so"
 #define XPCOM_DLL "libxpcom"MOZ_DLL_SUFFIX
-#endif
-
-#if defined(XP_WIN) || defined(XP_OS2)
-  #define XPCOM_FILE_PATH_SEPARATOR       '\\'
-#else
-  #define XPCOM_FILE_PATH_SEPARATOR       '/'
 #endif
 
     Embedding::Embedding (EmbeddingOptions* opt, 
@@ -109,7 +83,7 @@ namespace OSGK
           PathExpand (path);
           if ((path.length() > 0)
               && (!IsPathSeparator (path[path.length()-1])))
-            path.push_back (XPCOM_FILE_PATH_SEPARATOR);
+            path.push_back (FILE_PATH_SEPARATOR);
           path.append (XPCOM_DLL);
           xpcomState = XPCOMGlueStartup (path.c_str());
           if (NS_SUCCEEDED (xpcomState))
@@ -167,7 +141,7 @@ namespace OSGK
       nsCOMPtr<nsILocalFile> binPath;
       {
         NS_ConvertASCIItoUTF16 greBinDir (xpcomPath.c_str());
-        PRInt32 slashPos = greBinDir.RFindChar (XPCOM_FILE_PATH_SEPARATOR);
+        PRInt32 slashPos = greBinDir.RFindChar (FILE_PATH_SEPARATOR);
         if (slashPos != -1) greBinDir.SetLength (slashPos);
 
         res = NS_NewLocalFile (greBinDir, false, getter_AddRefs(binPath));
@@ -178,7 +152,8 @@ namespace OSGK
         }
       }
 
-      res = XRE_InitEmbedding (binPath, 0, 0, 0, 0);
+      res = XRE_InitEmbedding (binPath, 0, 
+        opt ? opt->GetDirectoryService() : 0, 0, 0);
       if (NS_FAILED (res))
       {
         result = res;
@@ -240,6 +215,12 @@ void osgk_embedding_options_add_search_path (OSGK_EmbeddingOptions* options,
                                              const char* path)
 {
   static_cast<OSGK::Impl::EmbeddingOptions*> (options)->AddSearchPath (path);
+}
+
+void osgk_embedding_options_add_components_path (OSGK_EmbeddingOptions* options, 
+                                                 const char* path)
+{
+  static_cast<OSGK::Impl::EmbeddingOptions*> (options)->AddComponentsPath (path);
 }
 
 OSGK_Embedding* osgk_embedding_create (OSGK_GeckoResult* result)
