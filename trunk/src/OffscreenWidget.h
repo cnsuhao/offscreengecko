@@ -42,6 +42,8 @@
 #include "EventHelpers.h"
 #include "nsBaseWidget.h"
 
+#include GECKO_INCLUDE(gfx,nsIRegion.h)
+
 // FF3b1 Gecko has hat, XULRunner1.9b2pre doesn't
 class nsIMenuListener;
 
@@ -58,6 +60,9 @@ namespace OSGK
       OffscreenWidget* parent;
       Browser* browser;
       nsRefPtr<gfxImageSurface> surface;
+      nsCOMPtr<nsIRegion> dirtyRegion;
+
+      void CreateRegion (nsCOMPtr<nsIRegion>& rgn);
     
       virtual nsresult CommonCreate (nsNativeWidget aNativeParent,
 	nsIWidget *aParent, const nsRect     &aRect, 
@@ -104,8 +109,7 @@ namespace OSGK
       }
       bool DispatchToChild (nsGUIEvent& event);
     public:
-      OffscreenWidget() : visible (false), enabled (true), parent (0),
-        browser (0) {}
+      OffscreenWidget();
     
       NS_IMETHOD Create(nsIWidget        *aParent,
 			const nsRect     &aRect,
@@ -178,14 +182,19 @@ namespace OSGK
         return SetFocusedChild (this);
       }
     
+      NS_IMETHOD Validate();
+      NS_IMETHOD InvalidateRegion(const nsIRegion *aRegion, PRBool aIsSynchronous);
       NS_IMETHOD Invalidate(PRBool aIsSynchronous)
       { return Invalidate (mBounds, aIsSynchronous); }
 
       NS_IMETHOD Invalidate(const nsRect & aRect, PRBool aIsSynchronous)
       { 
+        dirtyRegion->Union (aRect.x, aRect.y, aRect.width, aRect.height);
         if (parent != 0)
         {
-          parent->Invalidate (aRect, aIsSynchronous);
+          nsRect newRect (aRect);
+          newRect.MoveBy (mBounds.x, mBounds.y);
+          parent->Invalidate (newRect, aIsSynchronous);
         }
         else
         {

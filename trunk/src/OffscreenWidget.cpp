@@ -38,10 +38,13 @@
 
 #include "wrap_gfxASurface.h"
 
+#include GECKO_INCLUDE(gfx,nsGfxCIID.h)
 #include GECKO_INCLUDE(gfx,nsIDeviceContext.h)
 #include GECKO_INCLUDE(gfx,nsIRenderingContext.h)
 
 #include GECKO_INCLUDE(thebes,gfxContext.h)
+
+#include GECKO_INCLUDE(xpcom,nsComponentManagerUtils.h)
 
 #include "identstrings.h"
 #include "OffscreenWidget.h"
@@ -56,6 +59,13 @@ namespace OSGK
       IDENTSTRINGS_ID(NS_KEY_PRESS)
     DECLARE_IDENSTRINGS_END;
     static IdEventMsg idEventMsg;
+
+    void OffscreenWidget::CreateRegion (nsCOMPtr<nsIRegion>& rgn)
+    {
+      static NS_DEFINE_CID(kRegionCID, NS_REGION_CID);
+
+      rgn = do_CreateInstance (kRegionCID);
+    }
 
     nsresult OffscreenWidget::CommonCreate (nsNativeWidget aNativeParent,
                                             nsIWidget *aParent, const nsRect &aRect, 
@@ -90,6 +100,13 @@ namespace OSGK
       return NS_OK;
     }
 
+    OffscreenWidget::OffscreenWidget() : visible (false), enabled (true), 
+      parent (0), browser (0)
+    {
+      CreateRegion (dirtyRegion);
+      dirtyRegion->Init ();
+    }
+
     NS_IMETHODIMP OffscreenWidget::Create(nsIWidget        *aParent,
                                           const nsRect     &aRect,
                                           EVENT_CALLBACK   aHandleEventFunction,
@@ -114,10 +131,63 @@ namespace OSGK
         aContext, aAppShell, aToolkit, aInitData);
     }
 
+    NS_IMETHODIMP OffscreenWidget::Validate()
+    {
+      return dirtyRegion->Init ();
+    }
+
+    NS_IMETHODIMP OffscreenWidget::InvalidateRegion(const nsIRegion *aRegion, PRBool aIsSynchronous)
+    {
+      dirtyRegion->Union (*aRegion);
+      if (parent != 0)
+      {
+        nsCOMPtr<nsIRegion> newRegion;
+        CreateRegion (newRegion);
+        newRegion->SetTo (*aRegion);
+        newRegion->Offset (mBounds.x, mBounds.y);
+        parent->InvalidateRegion (newRegion, aIsSynchronous);
+      }
+      else
+      {
+        if (aIsSynchronous)
+	{
+	  Update();
+	}
+	else
+	{
+          if (browser) browser->SetUpdateState (Browser::updNeedsUpdate);
+	}
+      }
+      return NS_OK;
+    }
+
     NS_IMETHODIMP OffscreenWidget::Update()
     {
       PRBool result = true;
       nsEventStatus eventStatus = nsEventStatus_eIgnore;
+
+      if (!dirtyRegion->ContainsRect (mBounds.x, mBounds.y,
+        mBounds.width, mBounds.height))
+        return NS_OK;
+
+      nsCOMPtr<nsIRenderingContext> rc;
+      nsresult rv = mContext->CreateRenderingContextInstance (*getter_AddRefs(rc));
+      if (NS_FAILED(rv)) {
+        NS_WARNING("CreateRenderingContextInstance failed");
+        return NS_ERROR_FAILURE;
+      }
+
+      nsRefPtr<gfxASurface> targetSurface (GetThebesSurface ());
+      rv = rc->Init (mContext, targetSurface);
+      if (NS_FAILED(rv)) {
+        NS_WARNING("RC::Init failed");
+        return NS_ERROR_FAILURE;
+      }
+
+      rc->SetClipRegion (*dirtyRegion, nsClipCombine_kReplace);
+
+      gfxContext* thebesContext = reinterpret_cast<gfxContext*> (
+        rc->GetNativeGraphicData (nsIRenderingContext::NATIVE_THEBES_CONTEXT));
 
       if (mEventCallback)
       {
@@ -125,26 +195,11 @@ namespace OSGK
 
         NS_ADDREF(event.widget);
 
-        event.region = nsnull;
+        //event.region = nsnull;
         // @@@ Should use actual dirty area here some time.
-        event.rect = &mBounds;
-
-        nsCOMPtr<nsIRenderingContext> rc;
-        nsresult rv = mContext->CreateRenderingContextInstance (*getter_AddRefs(rc));
-        if (NS_FAILED(rv)) {
-          NS_WARNING("CreateRenderingContextInstance failed");
-          return NS_ERROR_FAILURE;
-        }
-
-        nsRefPtr<gfxASurface> targetSurface (GetThebesSurface ());
-        rv = rc->Init (mContext, targetSurface);
-        if (NS_FAILED(rv)) {
-          NS_WARNING("RC::Init failed");
-          return NS_ERROR_FAILURE;
-        }
-
-        gfxContext* thebesContext = reinterpret_cast<gfxContext*> (
-          rc->GetNativeGraphicData (nsIRenderingContext::NATIVE_THEBES_CONTEXT));
+        //event.rect = &mBounds;
+        event.region = dirtyRegion;
+        event.rect = 0;
 
         // We're rendering with translucency, we're going to be
         // rendering the whole window; make sure we clear it first
@@ -170,29 +225,34 @@ namespace OSGK
           thebesContext->Paint();
         }*/
         
-        nsIWidget* child = mFirstChild;
-        while (child != 0)
-        {
-          PRBool vis;
-          if (NS_SUCCEEDED (child->IsVisible (vis)) && vis)
-          {
-            child->Update ();
-            nsRect childBounds;
-            child->GetBounds (childBounds);
-
-            thebesContext->Translate (gfxPoint (childBounds.x, childBounds.y));
-            thebesContext->DrawSurface (child->GetThebesSurface(), 
-              gfxSize (childBounds.width, childBounds.height));
-            thebesContext->Translate (gfxPoint (-childBounds.x, -childBounds.y));
-          }
-
-          child = child->GetNextSibling();
-        }
-
         NS_RELEASE(event.widget);
       }
 
-     if (browser) browser->SetUpdateState (Browser::updDirty);
+      nsIWidget* child = mFirstChild;
+      while (child != 0)
+      {
+        PRBool vis;
+        if (NS_SUCCEEDED (child->IsVisible (vis)) && vis)
+        {
+          nsRect childBounds;
+          child->GetBounds (childBounds);
+          if (dirtyRegion->ContainsRect (childBounds.x, childBounds.y,
+            childBounds.width, childBounds.height))
+	  {
+	    child->Update ();
+
+            thebesContext->Translate (gfxPoint (childBounds.x, childBounds.y));
+    	    thebesContext->DrawSurface (child->GetThebesSurface(), 
+	      gfxSize (childBounds.width, childBounds.height));
+	    thebesContext->Translate (gfxPoint (-childBounds.x, -childBounds.y));
+	  }
+        }
+
+        child = child->GetNextSibling();
+      }
+
+      if (browser) browser->SetUpdateState (Browser::updDirty);
+      dirtyRegion->Init ();
 
       return result ? NS_OK : NS_ERROR_FAILURE;
     }
