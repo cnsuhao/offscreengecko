@@ -1,5 +1,10 @@
 2007-11-28	Frank Richter	<frank.richter@gmail.com>
 
+* Made the update logic smarter by actually utilizing the "dirty" regions
+  passed in by Gecko.
+
+2007-11-28	Frank Richter	<frank.richter@gmail.com>
+
 * Fixed some non-C code: enums (spotted by Andreas Kirsch) and an inline in
   gecko_mem.h.
 
