@@ -1,3 +1,8 @@
+2007-11-28	Frank Richter	<frank.richter@gmail.com>
+
+* Fixed some non-C code: enums (spotted by Andreas Kirsch) and an inline in
+  gecko_mem.h.
+
 2007-11-25	Frank Richter	<frank.richter@gmail.com>
 
 * Added convenience function to register a global JavaScript object for

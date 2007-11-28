@@ -73,4 +73,12 @@
 /// A Gecko result code
 typedef unsigned int OSGK_GeckoResult;
 
+#if defined(__cplusplus) || defined(__GNUC__)
+#  define OSGK_INLINE	inline
+#elif defined(_MSC_VER)
+#  define OSGK_INLINE	__inline
+#else
+#  define OSGK_INLINE
+#endif
+
 #endif // __OFFSCREENGECKO_DEFS_H__

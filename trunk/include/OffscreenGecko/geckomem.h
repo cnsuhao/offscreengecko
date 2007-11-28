@@ -81,7 +81,7 @@ OSGK_EXTERN_C OSGK_API void* osgk_geckomem_realloc (OSGK_GeckoMem* mem,
  * \param size Amount of memory to allocate and size of data to copy.
  * \return Allocated block of memory or 0 if out of memory.
  */
-inline void* osgk_geckomem_clone (OSGK_GeckoMem* mem, const void* p, size_t size)
+static OSGK_INLINE void* osgk_geckomem_clone (OSGK_GeckoMem* mem, const void* p, size_t size)
 {
   void* newP = osgk_geckomem_alloc (mem, size);
   if (newP != 0)
