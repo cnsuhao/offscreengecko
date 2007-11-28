@@ -19,6 +19,7 @@ cp out/release/OffscreenGecko.lib ${WORKDIR}/${PACKAGE}/lib
 ${TOP}/bin/ignorantcopy.sh include/OffscreenGecko ${WORKDIR}/${PACKAGE}/include/OffscreenGecko
 
 cp ${TOP}/sdk/win32/*.txt ${WORKDIR}/${PACKAGE}/
+cp ${TOP}/ChangeLog.txt ${WORKDIR}/${PACKAGE}/
 cp -R ${TOP}/out/api/html ${WORKDIR}/${PACKAGE}/apidocs
 
 cd ${WORKDIR}
