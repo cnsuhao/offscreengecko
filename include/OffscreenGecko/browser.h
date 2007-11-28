@@ -104,7 +104,7 @@ OSGK_EXTERN_C OSGK_API void osgk_browser_unlock_data (OSGK_Browser* browser,
  * @{ */
  
 /// Mouse button ID
-enum OSGK_MouseButton
+typedef enum OSGK_MouseButton
 {
   /// Left mouse button
   mbLeft, 
@@ -112,10 +112,10 @@ enum OSGK_MouseButton
   mbRight, 
   /// Middle mouse button
   mbMiddle
-};
+} OSGK_MouseButton;
 
 /// Type of mouse button event
-enum OSGK_MouseButtonEventType
+typedef enum OSGK_MouseButtonEventType
 {
   /// Mouse button was pressed
   meDown,
@@ -123,7 +123,7 @@ enum OSGK_MouseButtonEventType
   meUp,
   /// Mouse button was double-clicked
   meDoubleClick
-};
+} OSGK_MouseButtonEventType;
 
 /**
  * Send a mouse move event to a browser object.
@@ -151,7 +151,7 @@ OSGK_EXTERN_C OSGK_API void osgk_browser_event_mouse_button (
  * @{ */
  
 /// Type of keyboard event
-enum OSGK_KeyboardEventType
+typedef enum OSGK_KeyboardEventType
 {
   /// Key was pressed
   keDown,
@@ -159,7 +159,7 @@ enum OSGK_KeyboardEventType
   keUp,
   /// Key was pressed
   kePress
-};
+} OSGK_KeyboardEventType;
 
 /// Supported keys for up/down keyboard events
 enum
