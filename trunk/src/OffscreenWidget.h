@@ -187,28 +187,7 @@ namespace OSGK
       NS_IMETHOD Invalidate(PRBool aIsSynchronous)
       { return Invalidate (mBounds, aIsSynchronous); }
 
-      NS_IMETHOD Invalidate(const nsRect & aRect, PRBool aIsSynchronous)
-      { 
-        dirtyRegion->Union (aRect.x, aRect.y, aRect.width, aRect.height);
-        if (parent != 0)
-        {
-          nsRect newRect (aRect);
-          newRect.MoveBy (mBounds.x, mBounds.y);
-          parent->Invalidate (newRect, aIsSynchronous);
-        }
-        else
-        {
-          if (aIsSynchronous)
-	  {
-	    Update();
-	  }
-	  else
-	  {
-            if (browser) browser->SetUpdateState (Browser::updNeedsUpdate);
-	  }
-        }
-	return NS_OK;
-      }
+      NS_IMETHOD Invalidate(const nsRect & aRect, PRBool aIsSynchronous);
     
       NS_IMETHOD Update();
 
