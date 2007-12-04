@@ -138,12 +138,14 @@ namespace OSGK
 
     NS_IMETHODIMP OffscreenWidget::InvalidateRegion(const nsIRegion *aRegion, PRBool aIsSynchronous)
     {
-      dirtyRegion->Union (*aRegion);
+      nsCOMPtr<nsIRegion> newRegion;
+      CreateRegion (newRegion);
+      newRegion->SetTo (*aRegion);
+      newRegion->Intersect (0, 0, mBounds.width, mBounds.height);
+      if (newRegion->IsEmpty()) return NS_OK;
+      dirtyRegion->Union (*newRegion);
       if (parent != 0)
       {
-        nsCOMPtr<nsIRegion> newRegion;
-        CreateRegion (newRegion);
-        newRegion->SetTo (*aRegion);
         newRegion->Offset (mBounds.x, mBounds.y);
         parent->InvalidateRegion (newRegion, aIsSynchronous);
       }
@@ -161,14 +163,71 @@ namespace OSGK
       return NS_OK;
     }
 
+    struct IntersectingRect : public nsRect
+    {
+      IntersectingRect (const nsRect& r) : nsRect (r) {}
+
+      PRBool IntersectRect(const nsRect &aRect1, const nsRect &aRect2)
+      {
+        nscoord  xmost1 = aRect1.XMost();
+        nscoord  ymost1 = aRect1.YMost();
+        nscoord  xmost2 = aRect2.XMost();
+        nscoord  ymost2 = aRect2.YMost();
+        nscoord  temp;
+
+        x = std::max(aRect1.x, aRect2.x);
+        y = std::max(aRect1.y, aRect2.y);
+
+        // Compute the destination width
+        temp = std::min(xmost1, xmost2);
+        if (temp <= x) {
+          Empty();
+          return PR_FALSE;
+        }
+        width = temp - x;
+
+        // Compute the destination height
+        temp = std::min(ymost1, ymost2);
+        if (temp <= y) {
+          Empty();
+          return PR_FALSE;
+        }
+        height = temp - y;
+
+        return PR_TRUE;
+      }
+    };
+
+    NS_IMETHODIMP OffscreenWidget::Invalidate(const nsRect & aRect, PRBool aIsSynchronous)
+    { 
+      IntersectingRect newRect (aRect);
+      newRect.MoveBy (mBounds.x, mBounds.y);
+      if (!newRect.IntersectRect (newRect, mBounds)) return NS_OK;
+
+      dirtyRegion->Union (newRect.x-mBounds.x, newRect.y-mBounds.y, 
+        newRect.width, newRect.height);
+      if (parent != 0)
+      {
+        parent->Invalidate (newRect, aIsSynchronous);
+      }
+      else
+      {
+        if (aIsSynchronous)
+        {
+	  Update();
+	}
+	else
+	{
+          if (browser) browser->SetUpdateState (Browser::updNeedsUpdate);
+	}
+      }
+      return NS_OK;
+    }
+
     NS_IMETHODIMP OffscreenWidget::Update()
     {
       PRBool result = true;
       nsEventStatus eventStatus = nsEventStatus_eIgnore;
-
-      if (!dirtyRegion->ContainsRect (mBounds.x, mBounds.y,
-        mBounds.width, mBounds.height))
-        return NS_OK;
 
       nsCOMPtr<nsIRenderingContext> rc;
       nsresult rv = mContext->CreateRenderingContextInstance (*getter_AddRefs(rc));
