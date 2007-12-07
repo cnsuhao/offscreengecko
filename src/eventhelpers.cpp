@@ -47,14 +47,19 @@ namespace OSGK
   {
     namespace EventHelpers
     {
-      unsigned int KeyOSGKToGecko (unsigned int key)
+      unsigned int KeyOSGKToGecko (unsigned int key, bool& isChar)
       {
         switch (key)
         {
         #define MAP_KEY(oKey, gKey)   \
-          case OSGKKey_ ## oKey: return nsIDOMKeyEvent::DOM_VK_ ## gKey;
+          case OSGKKey_ ## oKey: isChar = false; return nsIDOMKeyEvent::DOM_VK_ ## gKey;
+        #define MAP_KEY_CHAR(oKey, gKey)   \
+          case OSGKKey_ ## oKey: isChar = true; return gKey;
         #include "keymapping.inl"
         #undef MAP_KEY
+        #undef MAP_KEY_CHAR
+        default:
+          if (key < OSGKKey_First) return key;
         }
         return 0;
       }

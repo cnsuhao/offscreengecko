@@ -43,7 +43,7 @@ namespace OSGK
   {
     namespace EventHelpers
     {
-      unsigned int KeyOSGKToGecko (unsigned int key);
+      unsigned int KeyOSGKToGecko (unsigned int key, bool& isChar);
       
       class KeyState
       {
