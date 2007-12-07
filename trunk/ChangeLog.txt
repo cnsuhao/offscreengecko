@@ -1,5 +1,9 @@
 2007-12-07	Frank Richter	<frank.richter@gmail.com>
 
+* Fixed space key to be sent as a character to gecko.
+
+2007-12-07	Frank Richter	<frank.richter@gmail.com>
+
 * Emit 'key press' events to gecko only on received key down events, not key
   up events as well.
 

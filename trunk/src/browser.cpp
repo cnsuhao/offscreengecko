@@ -290,18 +290,8 @@ namespace OSGK
     {
       if (focusedWidget == 0) return false;
 
-      unsigned int geckoKey;
       bool isChar;
-      if (key >= OSGKKey_First)
-      {
-        geckoKey = EventHelpers::KeyOSGKToGecko (key);
-        isChar = false;
-      }
-      else
-      {
-        geckoKey = key;
-        isChar = true;
-      }
+      unsigned int geckoKey = EventHelpers::KeyOSGKToGecko (key, isChar);
       if (geckoKey == 0) return false;
       bool down;
       switch (eventType)
