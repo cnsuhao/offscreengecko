@@ -41,11 +41,13 @@
 
 #include GECKO_INCLUDE(xpcom,nsStringAPI.h)
 
+#include "OffscreenGecko/string.h"
+
 namespace OSGK
 {
   namespace Impl
   {
-    class BaseString : public BaseObject
+    class BaseString : public BaseObject<OSGK_String>
     {
     public:
       virtual const char* Get() = 0;

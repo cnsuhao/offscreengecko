@@ -7,11 +7,13 @@
 #include GECKO_INCLUDE(xpcom,nsCOMPtr.h)
 #include GECKO_INCLUDE(xpcom,nsIFactory.h)
 
+#include "OffscreenGecko/componentmgr.h"
+
 namespace OSGK
 {
   namespace Impl
   {
-    class ComponentMgr : public BaseObject
+    class ComponentMgr : public BaseObject<OSGK_ComponentMgr>
     {
       nsresult initResult;
 

@@ -35,12 +35,14 @@
  * ***** END LICENSE BLOCK ***** */
 
 #include "OffscreenGecko/baseobj.h"
+#undef osgk_addref
+#undef osgk_release
 
 #include "baseobj_private.h"
 
 inline void _osgkI_destroy (OSGK_BaseObject* obj)
 {
-  delete static_cast<OSGK::Impl::BaseObject*> (obj);
+  delete static_cast<OSGK::Impl::BaseObject<OSGK_BaseObject>*> (obj);
 }
 
 int osgk_addref (OSGK_BaseObject* obj)

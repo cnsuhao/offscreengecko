@@ -57,7 +57,7 @@ namespace OSGK
 {
   namespace Impl
   {
-    class EmbeddingOptions : public BaseObject
+    class EmbeddingOptions : public BaseObject<OSGK_EmbeddingOptions>
     {
       nsRefPtr<DirectoryService> directoryService;
     public:
@@ -70,7 +70,7 @@ namespace OSGK
       { return directoryService; }
     };
 
-    class Embedding : public BaseObject
+    class Embedding : public BaseObject<OSGK_Embedding>
     {
       int xpcom_init_level;
       OffscreenComponents components;

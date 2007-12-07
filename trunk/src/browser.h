@@ -64,7 +64,7 @@ namespace OSGK
     class Embedding;
     class OffscreenWidget;
     
-    class Browser : public BaseObject, public NativeWidget
+    class Browser : public BaseObject<OSGK_Browser>, public NativeWidget
     {
       Ref<Embedding> embedding;
       

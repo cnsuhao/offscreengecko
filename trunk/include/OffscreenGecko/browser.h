@@ -46,7 +46,7 @@
 /**
  * Browser - encapsulates the display of content.
  */
-typedef OSGK_BaseObject OSGK_Browser;
+OSGK_DERIVEDTYPE(OSGK_Browser);
 
 /**
  * Create a new browser object. Browsers encapsulate the display of content.

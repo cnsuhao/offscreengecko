@@ -23,7 +23,7 @@ IF(CMAKE_GENERATOR MATCHES "Visual Studio")
   add_definitions(-Zc:wchar_t-)
 ENDIF(CMAKE_GENERATOR MATCHES "Visual Studio")
 
-add_definitions(-DBUILD_OSGK)
+add_definitions(-DOSGK_BUILD)
 add_definitions(-DMOZ_CAIRO_GFX)
 add_definitions(-DXPCOM_GLUE=1)
 

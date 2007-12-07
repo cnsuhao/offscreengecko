@@ -117,11 +117,36 @@
  * \endcode
  */
 
-struct OSGK_BaseObject_s;
+struct OSGK_BaseObject_s
+{
+#ifdef OSGK_BUILD
+  ///\internal Object reference count
+  int refCount;
+#else
+# ifndef __cplusplus
+  int reserved;
+# endif
+#endif
+};
 /**
  * Base OffscreenGecko object. All other types derive from this.
  */
 typedef struct OSGK_BaseObject_s OSGK_BaseObject;
+
+/*#ifdef __cplusplus
+# ifdef BUILD_OSGK
+#   define OSGK_DERIVEDTYPE(T)     class T;
+# else
+#   define OSGK_DERIVEDTYPE(T)            \
+      class T : public OSGK_BaseObject {  \
+      }
+# endif
+#else*/
+# define OSGK_DERIVEDTYPE(T)            \
+    typedef struct T ## _s {            \
+      OSGK_BaseObject baseobj;          \
+    } T
+//#endif
 
 /**
  * Acquire a reference to an OffscreenGecko object. Returns new reference 
@@ -131,6 +156,19 @@ OSGK_EXTERN_C OSGK_API int osgk_addref (OSGK_BaseObject* obj);
 
 /// Release a reference to an OffscreenGecko object.
 OSGK_EXTERN_C OSGK_API int osgk_release (OSGK_BaseObject* obj);
+
+static OSGK_INLINE int osgk_addref_real (OSGK_BaseObject* obj)
+{
+  return osgk_addref (obj);
+}
+
+static OSGK_INLINE int osgk_release_real (OSGK_BaseObject* obj)
+{
+  return osgk_release (obj);
+}
+
+#define osgk_addref(obj)    osgk_addref_real (&((obj)->baseobj))
+#define osgk_release(obj)   osgk_release_real (&((obj)->baseobj))
 
 #ifdef __cplusplus
 namespace OSGK

@@ -43,7 +43,7 @@ namespace OSGK
 {
   namespace Impl
   {
-    class GeckoMem : public BaseObject
+    class GeckoMem : public BaseObject<OSGK_GeckoMem>
     {
     public:
       void* Alloc (size_t size);

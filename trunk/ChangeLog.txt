@@ -1,3 +1,8 @@
+2007-12-07	Frank Richter	<frank.richter@gmail.com>
+
+* Change typing scheme so "object types" are not aliases to the base object
+  types, but distinct types. This allows type checking by the compiler.
+
 2007-11-28	Frank Richter	<frank.richter@gmail.com>
 
 * Some dirty region handling tweaks.

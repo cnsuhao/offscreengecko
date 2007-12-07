@@ -48,7 +48,7 @@
  * Provides access to commonly used methods from the Gecko component manager
  * and registrar in a somewhat convenient manner.
  */
-typedef OSGK_BaseObject OSGK_ComponentMgr;
+OSGK_DERIVEDTYPE(OSGK_ComponentMgr);
 
 struct nsID;
 typedef struct nsID nsCID;
