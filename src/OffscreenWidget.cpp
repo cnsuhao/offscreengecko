@@ -459,7 +459,7 @@ namespace OSGK
         PRUint32 (down ? NS_KEY_DOWN : NS_KEY_UP), isChar);
       // Modelled after the behaviour of the Win32 widget code
       PRUint32 flags = ret ? NS_EVENT_FLAG_NO_DEFAULT : 0;
-      if (EventKey (kstate, key, PRUint32 (NS_KEY_PRESS), isChar, flags))
+      if (down && EventKey (kstate, key, PRUint32 (NS_KEY_PRESS), isChar, flags))
         ret = true; // @@@ Correct? Win32 widget seems to ignore that.
       return ret;
     }
