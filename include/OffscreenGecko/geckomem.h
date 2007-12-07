@@ -48,7 +48,7 @@
  * Gecko memory allocator access. Using it is sometimes required when handing
  * memory back to Gecko (e.g. from custom class implementations).
  */
-typedef OSGK_BaseObject OSGK_GeckoMem;
+OSGK_DERIVEDTYPE(OSGK_GeckoMem);
 
 /**
  * Allocate some memory using Gecko's memory allocator.

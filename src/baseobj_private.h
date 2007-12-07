@@ -39,19 +39,14 @@
 
 #include "OffscreenGecko/baseobj.h"
 
-struct OSGK_BaseObject_s
-{
-  ///\internal Object reference count
-  int refCount;
-};
-
 namespace OSGK
 {
   namespace Impl
   {
-    struct BaseObject : public OSGK_BaseObject
+    template<typename T>
+    struct BaseObject : public T
     {
-      BaseObject() { refCount = 1; }
+      BaseObject() { baseobj.refCount = 1; }
       virtual ~BaseObject() {}
 	
       int AddRef() { return osgk_addref (this); }

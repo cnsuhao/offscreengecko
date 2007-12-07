@@ -50,7 +50,7 @@
  * Embedding options object. Encapsulates parameters for configuring 
  * creation and initialization of the embedding environment.
  */
-typedef OSGK_BaseObject OSGK_EmbeddingOptions;
+OSGK_DERIVEDTYPE(OSGK_EmbeddingOptions);
 
 /**
  * Create a new embedding options object. Encapsulates parameters for
@@ -122,7 +122,7 @@ namespace OSGK
  * OffscreenGecko embedding object, the 'mother' of all OffscreenGecko
  * objects.
  */
-typedef OSGK_BaseObject OSGK_Embedding;
+OSGK_DERIVEDTYPE(OSGK_Embedding);
 
 /**
  * Create a new embedding object. An embedding is the 'mother' of all

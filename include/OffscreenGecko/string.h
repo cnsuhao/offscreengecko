@@ -46,7 +46,7 @@
 /**
  * String wrapper. Used to return strings from OffscreenGecko.
  */
-typedef OSGK_BaseObject OSGK_String;
+OSGK_DERIVEDTYPE(OSGK_String);
 
 /**
  * Get the string data.

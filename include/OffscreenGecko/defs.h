@@ -54,7 +54,7 @@
 #endif
 
 #ifdef WIN32
-#  ifdef BUILD_OSGK
+#  ifdef OSGK_BUILD
 #    define OSGK_API	_declspec(dllexport)
 #  else
 #    define OSGK_API	_declspec(dllimport)
