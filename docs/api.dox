@@ -265,7 +265,7 @@ EXTRACT_PRIVATE        = NO
 # If the EXTRACT_STATIC tag is set to YES all static members of a file 
 # will be included in the documentation.
 
-EXTRACT_STATIC         = NO
+EXTRACT_STATIC         = YES
 
 # If the EXTRACT_LOCAL_CLASSES tag is set to YES classes (and structs) 
 # defined locally in source files will be included in the documentation. 
@@ -1071,6 +1071,7 @@ INCLUDE_FILE_PATTERNS  =
 # instead of the = operator.
 
 PREDEFINED             = __cplusplus	\
+			 OSGK___DOXYRUN__ \
 			 OSGK_EXTERN_C=	\
 			 OSGK_API=
 
@@ -1081,7 +1082,9 @@ PREDEFINED             = __cplusplus	\
 
 EXPAND_AS_DEFINED      = OSGK_DEFAULT_ARG	\
 			 OSGK_CLASSTYPE_DEF	\
-			 OSGK_CLASSTYPE_REF
+			 OSGK_CLASSTYPE_REF	\
+			 OSGK_DERIVEDTYPE	\
+			 OSGK_INLINE
 
 # If the SKIP_FUNCTION_MACROS tag is set to YES (the default) then 
 # doxygen's preprocessor will remove all function-like macros that are alone 
