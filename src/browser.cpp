@@ -307,7 +307,7 @@ namespace OSGK
       newState.ApplyKey (key, down);
 
       bool taken = focusedWidget->EventKey (newState, geckoKey, down, isChar);
-      if (taken) kstate = newState;
+      kstate = newState;
       return taken;
     }
 
