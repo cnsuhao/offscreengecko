@@ -49,6 +49,11 @@
 #include "identstrings.h"
 #include "OffscreenWidget.h"
 
+#ifdef REPAINT_DUMP
+#include <fstream>
+#include "tgawrite.h"
+#endif
+
 namespace OSGK
 {
   namespace Impl
@@ -103,6 +108,9 @@ namespace OSGK
     OffscreenWidget::OffscreenWidget() : visible (false), enabled (true), 
       parent (0), browser (0)
     {
+    #ifdef REPAINT_DUMP
+      paintCounter = 0;
+    #endif
       CreateRegion (dirtyRegion);
       dirtyRegion->Init ();
     }
@@ -129,6 +137,21 @@ namespace OSGK
     {
       return CommonCreate (aParent, 0, aRect, aHandleEventFunction,
         aContext, aAppShell, aToolkit, aInitData);
+    }
+
+    NS_IMETHODIMP OffscreenWidget::Resize(PRInt32 aX, PRInt32 aY,
+      PRInt32 aWidth, PRInt32 aHeight, PRBool   aRepaint)
+    {
+      if (browser == 0)
+      {
+        if ((aWidth != mBounds.width) || (aHeight != mBounds.height))
+          surface = 0;
+        parent->Invalidate (mBounds, false);
+	mBounds.SetRect (aX, aY, aWidth, aHeight);
+        parent->Invalidate (mBounds, aRepaint);
+	//if (aRepaint) Update ();
+      }
+      return NS_OK;
     }
 
     NS_IMETHODIMP OffscreenWidget::Validate()
@@ -224,10 +247,64 @@ namespace OSGK
       return NS_OK;
     }
 
-    NS_IMETHODIMP OffscreenWidget::Update()
+#ifdef REPAINT_DUMP
+    class AlphaCounter
+    {
+      std::wstring s;
+    public:
+      AlphaCounter () : s(L"a") {}
+
+      AlphaCounter& operator++ ()
+      {
+        size_t p = 0;
+
+        while (true)
+        {
+          wchar_t& ch = s[p];
+          ch++;
+          if (ch > 'z')
+          {
+            ch = 'a';
+            p++;
+            if (p >= s.size())
+            {
+              s.append (L"a");
+              break;
+            }
+          }
+          else
+            break;
+        }
+        return *this;
+      }
+
+      const wchar_t* GetStr() const { return s.c_str(); }
+    };
+#endif
+
+    nsresult OffscreenWidget::UpdateRegion (nsIRegion* dirtyRegion)
     {
       PRBool result = true;
       nsEventStatus eventStatus = nsEventStatus_eIgnore;
+
+      if (dirtyRegion->IsEmpty()) return NS_OK;
+
+#ifdef REPAINT_DUMP
+      wchar_t filename[64];
+      std::ofstream tgastream;
+      AlphaCounter localCounter;
+      if ((surface != 0) && (surface->Data() != 0))
+      {
+        snwprintf (filename, sizeof (filename)/sizeof (wchar_t), 
+          L"paint_%08x_%u_%ls.tga", this, paintCounter, localCounter.GetStr());
+        tgastream.open (filename, std::ios::out | std::ios::binary);
+        const gfxIntSize& surfSize (surface->GetSize ());
+        TGAWriter::WriteBGRAImage (surfSize.width, surfSize.height,
+          surface->Data(), tgastream);
+        tgastream.close ();
+      }
+      ++localCounter;
+#endif
 
       nsCOMPtr<nsIRenderingContext> rc;
       nsresult rv = mContext->CreateRenderingContextInstance (*getter_AddRefs(rc));
@@ -254,11 +331,20 @@ namespace OSGK
 
         NS_ADDREF(event.widget);
 
-        //event.region = nsnull;
-        // @@@ Should use actual dirty area here some time.
-        //event.rect = &mBounds;
-        event.region = dirtyRegion;
-        event.rect = 0;
+        /* Apparently, the scroll bars for the browser are not drawn correctly
+           when a region to draw is specified, but they work if only a rectangle
+           is given. */
+        bool scrollbarHack = (parent != 0) && (parent->parent == 0);
+        if (scrollbarHack)
+        {
+          event.region = 0;
+	  event.rect = &mBounds;
+        }
+        else
+        {
+          event.region = dirtyRegion;
+	  event.rect = 0;
+        }
 
         // We're rendering with translucency, we're going to be
         // rendering the whole window; make sure we clear it first
@@ -266,26 +352,42 @@ namespace OSGK
         thebesContext->Paint();
         thebesContext->SetOperator(gfxContext::OPERATOR_OVER);
 
+  #ifdef REPAINT_DUMP
+        if ((surface != 0) && (surface->Data() != 0))
+        {
+          snwprintf (filename, sizeof (filename)/sizeof (wchar_t), 
+            L"paint_%08x_%u_%s.tga", this, paintCounter, localCounter.GetStr());
+          tgastream.open (filename, std::ios::out | std::ios::binary);
+          const gfxIntSize& surfSize (surface->GetSize ());
+          TGAWriter::WriteBGRAImage (surfSize.width, surfSize.height,
+            surface->Data(), tgastream);
+          tgastream.close ();
+        }
+  #endif
+
         event.renderingContext = rc;
         DispatchEvent (&event, eventStatus);
         result = eventStatus == nsEventStatus_eConsumeNoDefault;
         event.renderingContext = nsnull;
 
-        //if (mIsTranslucent) {
-          // Data from offscreen drawing surface was copied to memory bitmap of transparent
-          // bitmap. Now it can be read from memory bitmap to apply alpha channel and after
-          // that displayed on the screen.
-          //UpdateTranslucentWindow();
-        /*} else if (result) {
-          // Only update if DispatchWindowEvent returned TRUE; otherwise, nothing handled
-          // this, and we'll just end up painting with black.
-          thebesContext->PopGroupToSource();
-          thebesContext->SetOperator(gfxContext::OPERATOR_SOURCE);
-          thebesContext->Paint();
-        }*/
-        
         NS_RELEASE(event.widget);
       }
+
+#ifdef REPAINT_DUMP
+      ++localCounter;
+
+      if ((surface != 0) && (surface->Data() != 0))
+      {
+        snwprintf (filename, sizeof (filename)/sizeof (wchar_t), 
+          L"paint_%08x_%u_%s.tga", this, paintCounter, localCounter.GetStr());
+        tgastream.open (filename, std::ios::out | std::ios::binary);
+        const gfxIntSize& surfSize (surface->GetSize ());
+        TGAWriter::WriteBGRAImage (surfSize.width, surfSize.height,
+          surface->Data(), tgastream);
+        tgastream.close ();
+      }
+      ++localCounter;
+#endif
 
       nsIWidget* child = mFirstChild;
       while (child != 0)
@@ -298,7 +400,7 @@ namespace OSGK
           if (dirtyRegion->ContainsRect (childBounds.x, childBounds.y,
             childBounds.width, childBounds.height))
 	  {
-	    child->Update ();
+            child->Update ();
 
             thebesContext->Translate (gfxPoint (childBounds.x, childBounds.y));
     	    thebesContext->DrawSurface (child->GetThebesSurface(), 
@@ -310,10 +412,38 @@ namespace OSGK
         child = child->GetNextSibling();
       }
 
-      if (browser) browser->SetUpdateState (Browser::updDirty);
-      dirtyRegion->Init ();
+#ifdef REPAINT_DUMP
+      if ((surface != 0) && (surface->Data() != 0))
+      {
+        snwprintf (filename, sizeof (filename)/sizeof (wchar_t), 
+          L"paint_%08x_%u_%s.tga", this, paintCounter, localCounter.GetStr());
+        tgastream.open (filename, std::ios::out | std::ios::binary);
+        const gfxIntSize& surfSize (surface->GetSize ());
+        TGAWriter::WriteBGRAImage (surfSize.width, surfSize.height,
+          surface->Data(), tgastream);
+        tgastream.close ();
+      }
+      paintCounter++;
+#endif
 
       return result ? NS_OK : NS_ERROR_FAILURE;
+    }
+
+    NS_IMETHODIMP OffscreenWidget::Update()
+    {
+      nsresult rc = UpdateRegion (dirtyRegion);
+      if (browser) browser->SetUpdateState (Browser::updDirty);
+      dirtyRegion->Init ();
+      return rc;
+    }
+
+    NS_IMETHODIMP OffscreenWidget::ScrollWidgets (PRInt32 aDx, PRInt32 aDy)
+    {
+      /* @@@ TODO: Investigate how to correctly shift the contents and if it
+                   gives benefits. */
+      Invalidate (false);
+
+      return NS_OK; 
     }
 
     NS_IMETHODIMP OffscreenWidget::DispatchEvent(nsGUIEvent* event, nsEventStatus & aStatus)
@@ -452,12 +582,20 @@ namespace OSGK
       return b;
     }
 
+    static bool IsModifier (unsigned int key)
+    {
+      return (key == OSGKKey_Alt) || (key == OSGKKey_Control) || (key == OSGKKey_Shift)
+        || (key == OSGKKey_CapsLock) || (key == OSGKKey_NumLock) 
+        || (key == OSGKKey_ScrollLock) || (key == OSGKKey_Meta);
+    }
+
     bool OffscreenWidget::EventKey (const EventHelpers::KeyState& kstate, 
                                     unsigned int key, bool down, bool isChar)
     {
       bool ret = EventKey (kstate, key, 
         PRUint32 (down ? NS_KEY_DOWN : NS_KEY_UP), isChar);
       // Modelled after the behaviour of the Win32 widget code
+      if (IsModifier (key)) return ret;
       PRUint32 flags = ret ? NS_EVENT_FLAG_NO_DEFAULT : 0;
       if (down && EventKey (kstate, key, PRUint32 (NS_KEY_PRESS), isChar, flags))
         ret = true; // @@@ Correct? Win32 widget seems to ignore that.

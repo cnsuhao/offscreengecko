@@ -47,6 +47,10 @@
 // FF3b1 Gecko has hat, XULRunner1.9b2pre doesn't
 class nsIMenuListener;
 
+/* Debuggging: Define to get widget contents dumped to disk at different stages
+   of repainting */
+//#define REPAINT_DUMP
+
 namespace OSGK
 {
   namespace Impl
@@ -61,6 +65,10 @@ namespace OSGK
       Browser* browser;
       nsRefPtr<gfxImageSurface> surface;
       nsCOMPtr<nsIRegion> dirtyRegion;
+
+    #ifdef REPAINT_DUMP
+      unsigned int paintCounter;
+    #endif
 
       void CreateRegion (nsCOMPtr<nsIRegion>& rgn);
     
@@ -161,17 +169,7 @@ namespace OSGK
 			PRInt32 aY,
 			PRInt32 aWidth,
 			PRInt32 aHeight,
-			PRBool   aRepaint)
-      {
-        if (browser == 0)
-        {
-          if ((aWidth != mBounds.width) || (aHeight != mBounds.height))
-            surface = 0;
-	  mBounds.SetRect (aX, aY, aWidth, aHeight);
-	  if (aRepaint) Update ();
-        }
-	return NS_OK;
-      }
+			PRBool   aRepaint);
     
       NS_IMETHOD Enable(PRBool aState) { enabled = aState != 0; return NS_OK; }
     
@@ -189,6 +187,7 @@ namespace OSGK
 
       NS_IMETHOD Invalidate(const nsRect & aRect, PRBool aIsSynchronous);
     
+      nsresult UpdateRegion (nsIRegion* rgn);
       NS_IMETHOD Update();
 
       NS_IMETHOD AddMenuListener(nsIMenuListener * aListener)
@@ -197,9 +196,9 @@ namespace OSGK
       NS_IMETHOD SetColorMap(nsColorMap *aColorMap) { return NS_ERROR_NOT_IMPLEMENTED; }
     
       NS_IMETHOD Scroll(PRInt32 aDx, PRInt32 aDy, nsRect *aClipRect)
-      { return NS_ERROR_NOT_IMPLEMENTED; }
+      { return ScrollWidgets (aDx, aDy); }
     
-      NS_IMETHOD ScrollWidgets(PRInt32 aDx, PRInt32 aDy) { return NS_ERROR_NOT_IMPLEMENTED; }
+      NS_IMETHOD ScrollWidgets(PRInt32 aDx, PRInt32 aDy);
     
       NS_IMETHOD SetTitle(const nsAString& aTitle) { return NS_ERROR_NOT_IMPLEMENTED; }
     
