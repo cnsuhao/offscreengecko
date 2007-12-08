@@ -127,12 +127,14 @@ OSGK_DERIVEDTYPE(OSGK_Embedding);
 /// The version number of the OffscreenGecko API
 #define OSGK_API_VERSION    1
 
+#ifndef OSGK___DOXYRUN__
 /**\internal Create a new embedding object. Validates that the given API
  * version is supported.
  */
 OSGK_EXTERN_C OSGK_API OSGK_Embedding* osgk_embedding_create2 (
   unsigned int apiVer, OSGK_EmbeddingOptions* options, 
   OSGK_GeckoResult* geckoResult);
+#endif
 
 /**
  * Create a new embedding object. An embedding is the 'mother' of all
