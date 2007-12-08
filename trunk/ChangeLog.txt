@@ -1,3 +1,8 @@
+2007-12-08	Frank Richter	<frank.richter@gmail.com>
+
+* Changed embedding object creation to take a (hidden) "API version" parameter
+  which is used to make sure the used library matches the used header.
+
 2007-12-07	Frank Richter	<frank.richter@gmail.com>
 
 * Fixed space key to be sent as a character to gecko.
