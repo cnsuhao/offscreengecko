@@ -298,26 +298,16 @@ void osgk_embedding_options_add_components_path (OSGK_EmbeddingOptions* options,
   static_cast<OSGK::Impl::EmbeddingOptions*> (options)->AddComponentsPath (path);
 }
 
-OSGK_Embedding* osgk_embedding_create (OSGK_GeckoResult* result)
+OSGK_Embedding* osgk_embedding_create2 (unsigned int apiVer, 
+                                        OSGK_EmbeddingOptions* options, 
+                                        OSGK_GeckoResult* geckoResult)
 {
-  OSGK_GeckoResult rc;
-  OSGK::Impl::Embedding* e = new OSGK::Impl::Embedding (0, rc);
-  if (result) *result = rc;
-  if (NS_FAILED(rc))
-  {
-    delete e;
-    return 0;
-  }
-  return e;
-}
+  if (apiVer != OSGK_API_VERSION) return 0;
 
-OSGK_Embedding* osgk_embedding_create_with_options (
-  OSGK_EmbeddingOptions* options, OSGK_GeckoResult* result)
-{
   OSGK_GeckoResult rc;
   OSGK::Impl::Embedding* e = new OSGK::Impl::Embedding (
     static_cast<OSGK::Impl::EmbeddingOptions*> (options), rc);
-  if (result) *result = rc;
+  if (geckoResult) *geckoResult = rc;
   if (NS_FAILED(rc))
   {
     delete e;

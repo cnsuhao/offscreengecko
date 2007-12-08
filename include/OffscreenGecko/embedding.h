@@ -124,13 +124,26 @@ namespace OSGK
  */
 OSGK_DERIVEDTYPE(OSGK_Embedding);
 
+/// The version number of the OffscreenGecko API
+#define OSGK_API_VERSION    1
+
+/**\internal Create a new embedding object. Validates that the given API
+ * version is supported.
+ */
+OSGK_EXTERN_C OSGK_API OSGK_Embedding* osgk_embedding_create2 (
+  unsigned int apiVer, OSGK_EmbeddingOptions* options, 
+  OSGK_GeckoResult* geckoResult);
+
 /**
  * Create a new embedding object. An embedding is the 'mother' of all
  * OffscreenGecko objects.
  * \param geckoResult Returns the result code from Gecko. Can be 0.
  */
-OSGK_EXTERN_C OSGK_API OSGK_Embedding* osgk_embedding_create (
-  OSGK_GeckoResult* geckoResult OSGK_DEFAULT_ARG(0));
+static OSGK_INLINE OSGK_Embedding* osgk_embedding_create (
+  OSGK_GeckoResult* geckoResult OSGK_DEFAULT_ARG(0))
+{
+  return osgk_embedding_create2 (OSGK_API_VERSION, 0, geckoResult);
+}
 
 /**
  * Create a new embedding object. An embedding is the 'mother' of all
@@ -138,8 +151,11 @@ OSGK_EXTERN_C OSGK_API OSGK_Embedding* osgk_embedding_create (
  * \param options A set of options for the embedding to be created.
  * \param geckoResult Returns the result code from Gecko. Can be 0.
  */
-OSGK_EXTERN_C OSGK_API OSGK_Embedding* osgk_embedding_create_with_options (
-  OSGK_EmbeddingOptions* options, OSGK_GeckoResult* geckoResult OSGK_DEFAULT_ARG(0));
+static OSGK_INLINE OSGK_Embedding* osgk_embedding_create_with_options (
+  OSGK_EmbeddingOptions* options, OSGK_GeckoResult* geckoResult OSGK_DEFAULT_ARG(0))
+{
+  return osgk_embedding_create2 (OSGK_API_VERSION, options, geckoResult);
+}
 
 /**
  * Get Gecko memory allocator object.
