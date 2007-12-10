@@ -85,6 +85,14 @@ namespace OSGK
         else
           return parent->GetEmbedding();
       }
+      Browser* GetTopBrowser()
+      {
+        if (browser != 0)
+          return browser;
+        else if (parent != 0)
+          return parent->GetTopBrowser();
+        return 0;
+      }
       void DebugPrint (const wchar_t* format, ...)
       {
       #ifdef _DEBUG

@@ -1,3 +1,7 @@
+2007-12-10	Frank Richter	<frank.richter@gmail.com>
+
+* Make antialiasing mode controllable.
+
 2007-12-08	Frank Richter	<frank.richter@gmail.com>
 
 * Fixed scrolling, painting and modifier issues.

@@ -46,6 +46,7 @@
 #include "ref.h"
 
 #include GECKO_INCLUDE(docshell,nsIWebNavigation.h)
+#include GECKO_INCLUDE(thebes,gfxContext.h)
 #include GECKO_INCLUDE(thebes,gfxImageSurface.h)
 #include GECKO_INCLUDE(uriloader,nsIWebProgressListener.h)
 #include GECKO_INCLUDE(webbrwsr,nsIEmbeddingSiteWindow.h)
@@ -80,6 +81,8 @@ namespace OSGK
       int updateState;
       EventHelpers::KeyState kstate;
 
+      gfxContext::AntialiasMode aaMode;
+
       int mouseX, mouseY;
       bool MouseInside () const { return (mouseX >= 0) && (mouseY >= 0); }
     public:
@@ -107,6 +110,10 @@ namespace OSGK
         OSGK_MouseButtonEventType eventType);
 
       bool EventKey (unsigned int key, OSGK_KeyboardEventType eventType);
+
+      void SetAntialias (OSGK_AntiAliasType aaType);
+      OSGK_AntiAliasType GetAntialias ();
+      gfxContext::AntialiasMode GetGeckoAA() const { return aaMode; }
 
       gfxASurface* GetSurface() { return surface; }
       enum
