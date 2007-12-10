@@ -87,6 +87,10 @@
 #include GECKO_INCLUDE(xpcom,nsStringAPI.h)
 #include GECKO_INCLUDE(xpcom,nsWeakReference.h)
 
+/* Depends on whether a modification I made to gecko makes it into the source -
+   see https://bugzilla.mozilla.org/show_bug.cgi?id=407531 */
+//#define HAVE_GECKO_AA_GRAY
+
 OSGK_Browser* osgk_browser_create (OSGK_Embedding* embedding, 
                                    int width, int height)
 {
@@ -140,6 +144,16 @@ int osgk_browser_event_key (OSGK_Browser* browser, unsigned int key,
   OSGK_KeyboardEventType eventType)
 {
   return static_cast<OSGK::Impl::Browser*> (browser)->EventKey (key, eventType);
+}
+
+void osgk_browser_set_antialias (OSGK_Browser* browser, OSGK_AntiAliasType aaType)
+{
+  static_cast<OSGK::Impl::Browser*> (browser)->SetAntialias (aaType);
+}
+
+OSGK_AntiAliasType osgk_browser_get_antialias (OSGK_Browser* browser)
+{
+  return static_cast<OSGK::Impl::Browser*> (browser)->GetAntialias ();
 }
 
 namespace OSGK
@@ -240,6 +254,8 @@ namespace OSGK
       surface = new gfxImageSurface (size,
         gfxASurface::ImageFormatARGB32);
 
+      SetAntialias (aaGray);
+
       result = NS_OK;
     }
 
@@ -309,6 +325,40 @@ namespace OSGK
       bool taken = focusedWidget->EventKey (newState, geckoKey, down, isChar);
       kstate = newState;
       return taken;
+    }
+
+    void Browser::SetAntialias (OSGK_AntiAliasType aaType)
+    {
+      switch (aaType)
+      {
+      case aaNone:
+        aaMode = gfxContext::MODE_ALIASED;
+        break;
+      case aaGray:
+#ifdef HAVE_GECKO_AA_GRAY
+        aaMode = gfxContext::MODE_COVERAGE_GRAY;
+        break;
+#endif
+      case aaSubpixel:
+        aaMode = gfxContext::MODE_COVERAGE;
+        break;
+      }
+    }
+      
+    OSGK_AntiAliasType Browser::GetAntialias ()
+    {
+      switch (aaMode)
+      {
+      case gfxContext::MODE_ALIASED:
+        return aaNone;
+#ifdef HAVE_GECKO_AA_GRAY
+      case gfxContext::MODE_COVERAGE_GRAY:
+        return aaGray;
+#endif
+      default:
+      case gfxContext::MODE_COVERAGE:
+        return aaSubpixel;
+      }
     }
 
     //-----------------------------------------------------------------------

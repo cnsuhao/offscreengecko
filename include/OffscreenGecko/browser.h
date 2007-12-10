@@ -223,6 +223,39 @@ OSGK_EXTERN_C OSGK_API int osgk_browser_event_key (
 
 /** @} */
 
+/// Possible anti-aliasing types
+typedef enum OSGK_AntiAliasType
+{
+  /// Disable anti-aliasing
+  aaNone,
+  /// Gray-level antialiasing (default)
+  aaGray,
+  /* Depends on whether a modification I made to gecko makes it into the source -
+     see https://bugzilla.mozilla.org/show_bug.cgi?id=407531 */
+  /**
+   * Allow subpixel antialiasing (aka ClearType). This should only be used
+   * when it's known that a surface pixel will exactly match an LCD pixel. If
+   * that's not the case output will jave color fringes.
+   */
+  aaSubpixel
+} OSGK_AntiAliasType;
+
+/**
+ * Set antialiasing type for a browser object.
+ * \param browser The browser object.
+ * \param aaType The antialiasing type.
+ */
+OSGK_EXTERN_C OSGK_API void osgk_browser_set_antialias (
+  OSGK_Browser* browser, OSGK_AntiAliasType aaType);
+
+/**
+ * Get antialiasing type of a browser object.
+ * \param browser The browser object.
+ * \returns The antialiasing type.
+ */
+OSGK_EXTERN_C OSGK_API OSGK_AntiAliasType 
+  osgk_browser_get_antialias (OSGK_Browser* browser);
+
 #ifdef __cplusplus
 namespace OSGK
 {
@@ -348,6 +381,24 @@ namespace OSGK
       return osgk_browser_event_key (GetObject(), key, eventType) != 0;
     }
     /** @} */
+
+    /**
+     * Set antialiasing types.
+     * \param aaType The antialiasing type.
+     */
+    void SetAntialias (OSGK_AntiAliasType aaType)
+    {
+      osgk_browser_set_antialias (GetObject(), aaType);
+    }
+
+    /**
+     * Get antialiasing type.
+     * \returns The antialiasing type.
+     */
+    OSGK_AntiAliasType GetAntialias ()
+    {
+      return osgk_browser_get_antialias (GetObject());
+    }
   };
   
 } // namespace OSGK

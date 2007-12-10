@@ -324,6 +324,7 @@ namespace OSGK
 
       gfxContext* thebesContext = reinterpret_cast<gfxContext*> (
         rc->GetNativeGraphicData (nsIRenderingContext::NATIVE_THEBES_CONTEXT));
+      thebesContext->SetAntialiasMode (GetTopBrowser()->GetGeckoAA ());
 
       if (mEventCallback)
       {
