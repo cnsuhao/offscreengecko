@@ -63,10 +63,7 @@ namespace OSGK
       nsresult res = GetLocalFile (paths[pos++].c_str(), pathObj);
       if (NS_FAILED (res)) return res;
 
-      nsILocalFile* pathObjPtr;
-      pathObj.forget (&pathObjPtr);
-      *_retval = pathObjPtr;
-      
+      NS_ADDREF(*_retval = pathObj);
       return NS_OK;
     }
 
