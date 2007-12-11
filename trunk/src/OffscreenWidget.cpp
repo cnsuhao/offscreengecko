@@ -154,6 +154,19 @@ namespace OSGK
       return NS_OK;
     }
 
+    void OffscreenWidget::ResizeFromTheSourceOfPower (int width, int height)
+    {
+      mBounds.SetRect (0, 0, width, height);
+
+      nsSizeEvent event (true, NS_SIZE, this);
+      event.windowSize = &mBounds;
+      event.mWinWidth = width;
+      event.mWinHeight = height;
+
+      nsEventStatus status;
+      DispatchEvent (&event, status);
+    }
+
     NS_IMETHODIMP OffscreenWidget::Validate()
     {
       return dirtyRegion->Init ();

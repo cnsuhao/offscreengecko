@@ -57,6 +57,8 @@
 #include GECKO_INCLUDE(xpcom,nsCOMPtr.h)
 #include GECKO_INCLUDE(xpcom,nsIInterfaceRequestor.h)
 
+#include <vector>
+
 namespace OSGK
 {
   namespace Impl
@@ -77,6 +79,18 @@ namespace OSGK
       OffscreenWidget* widget;
       nsRefPtr<gfxImageSurface> surface;
       OffscreenWidget* focusedWidget;
+
+      struct LockedBuffer
+      {
+        const unsigned char* p;
+        int lockCount;
+        nsRefPtr<gfxImageSurface> surface;
+
+        LockedBuffer() : p (0), lockCount (0) {}
+      };
+      LockedBuffer lastLock;
+      typedef std::vector<LockedBuffer> LockedBufferVec;
+      LockedBufferVec locks;
 
       int updateState;
       EventHelpers::KeyState kstate;
@@ -117,6 +131,8 @@ namespace OSGK
       gfxContext::AntialiasMode GetGeckoAA() const { return aaMode; }
 
       void DoFocus (bool haveFocus, bool focusExternal);
+
+      void Resize (int width, int height);
 
       gfxASurface* GetSurface() { return surface; }
       enum

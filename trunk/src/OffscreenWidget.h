@@ -207,6 +207,8 @@ namespace OSGK
 			PRInt32 aWidth,
 			PRInt32 aHeight,
 			PRBool   aRepaint);
+
+      void ResizeFromTheSourceOfPower (int width, int height);
     
       NS_IMETHOD Enable(PRBool aState) { enabled = aState != 0; return NS_OK; }
     

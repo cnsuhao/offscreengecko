@@ -82,8 +82,14 @@ OSGK_EXTERN_C OSGK_API int osgk_browser_query_dirty (OSGK_Browser* browser);
  *   data has changed since the last time the data was requested). Can be 0.
  * \returns A pointer to the pixel data, in BGRA byte order. Alpha is
  *   premultiplied.
- * \remarks You need to call osgk_browser_unlock_data() after finishing
- *   processing the returned data.
+ * \remarks 
+ *  - You need to call osgk_browser_unlock_data() after finishing processing 
+ *    the returned data.
+ *  - Multiple calls to osgk_browser_lock_data() for the same browser object
+ *    are allowed; however, as long as the data is at least locked once it 
+ *    may not be updated and reflect changes to the displayed content.
+ *  - The returned buffer has the dimensions of the browser object at the time
+ *    of locking.
  */
 OSGK_EXTERN_C OSGK_API const unsigned char* osgk_browser_lock_data (
   OSGK_Browser* browser, int* isDirty OSGK_DEFAULT_ARG(0));
@@ -265,6 +271,15 @@ OSGK_EXTERN_C OSGK_API OSGK_AntiAliasType
  */
 OSGK_EXTERN_C OSGK_API void osgk_browser_focus (OSGK_Browser* browser);
 
+/**
+ * Resize a browser object to the specified dimensions.
+ * \param browser The browser object to resize.
+ * \param width New width.
+ * \param height New height.
+ */
+OSGK_EXTERN_C OSGK_API void osgk_browser_resize (OSGK_Browser* browser,
+  int width, int height);
+
 #ifdef __cplusplus
 namespace OSGK
 {
@@ -328,8 +343,14 @@ namespace OSGK
      *   data has changed since the last time the data was requested).
      * \returns A pointer to the pixel data, in BGRA byte order. Alpha is
      *   premultiplied.
-     * \remarks You need to call UnlockData() after finishing
-     *   processing the returned data.
+     * \remarks 
+     *  - You need to call UnlockData() after finishing processing 
+     *    the returned data.
+     *  - Multiple calls to LockData() for the same browser object
+     *    are allowed; however, as long as the data is at least locked once it 
+     *    may not be updated and reflect changes to the displayed content.
+     *  - The returned buffer has the dimensions of the browser object at the time
+     *    of locking.
      */
     const unsigned char* LockData(bool& isDirty)
     {
@@ -418,6 +439,16 @@ namespace OSGK
     void Focus ()
     {
       osgk_browser_focus (GetObject());
+    }
+
+    /**
+     * Resize browser object to the specified dimensions.
+     * \param width New width.
+     * \param height New height.
+     */
+    void Resize (int width, int height)
+    {
+      osgk_browser_resize (GetObject(), width, height);
     }
   };
   
