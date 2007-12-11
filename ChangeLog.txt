@@ -1,3 +1,8 @@
+2007-12-11	Frank Richter	<frank.richter@gmail.com>
+
+* Add focusing support and proper focus management. Proper focus management is 
+  required for some things such as e.g. proper caret display.
+
 2007-12-10	Frank Richter	<frank.richter@gmail.com>
 
 * Fix build error with latest XULrunner CVS.

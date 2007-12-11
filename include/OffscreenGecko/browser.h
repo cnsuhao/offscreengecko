@@ -256,6 +256,15 @@ OSGK_EXTERN_C OSGK_API void osgk_browser_set_antialias (
 OSGK_EXTERN_C OSGK_API OSGK_AntiAliasType 
   osgk_browser_get_antialias (OSGK_Browser* browser);
 
+/**
+ * Give focus to a browser object. Proper focus management is required for
+ * some things such as e.g. proper caret display.
+ * \param browser The browser object to give focus to.
+ * \remarks Focus can be taken away by giving it to another browser object or
+ *   clearing it with osgk_embedding_clear_focus().
+ */
+OSGK_EXTERN_C OSGK_API void osgk_browser_focus (OSGK_Browser* browser);
+
 #ifdef __cplusplus
 namespace OSGK
 {
@@ -398,6 +407,17 @@ namespace OSGK
     OSGK_AntiAliasType GetAntialias ()
     {
       return osgk_browser_get_antialias (GetObject());
+    }
+
+    /**
+     * Give focus to this browser object. Proper focus management is required for
+     * some things such as e.g. proper caret display.
+     * \remarks Focus can be taken away by giving it to another browser object or
+     *   clearing it with Embedding::ClearFocus().
+     */
+    void Focus ()
+    {
+      osgk_browser_focus (GetObject());
     }
   };
   

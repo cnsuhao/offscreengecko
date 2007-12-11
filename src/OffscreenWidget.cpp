@@ -106,7 +106,7 @@ namespace OSGK
     }
 
     OffscreenWidget::OffscreenWidget() : visible (false), enabled (true), 
-      parent (0), browser (0)
+      focused (false), parent (0), browser (0), focusedChild (0)
     {
     #ifdef REPAINT_DUMP
       paintCounter = 0;
@@ -608,6 +608,26 @@ namespace OSGK
     {
       return EventKey (kstate, key, PRUint32 (NS_KEY_PRESS), isChar);
     }
+
+    void OffscreenWidget::ChangeFocus (bool haveFocus, bool focusExternal)
+    {
+      if (focused == haveFocus) return;
+
+      focused = haveFocus;
+      if (haveFocus)
+      {
+        DispatchFocus (NS_GOTFOCUS, true);
+        DispatchFocus (NS_ACTIVATE, true);
+      }
+      else
+      {
+        DispatchFocus (NS_DEACTIVATE, !focusExternal);
+        DispatchFocus (NS_LOSTFOCUS, !focusExternal);
+      }
+      if (focusedChild != 0)
+        static_cast<OffscreenWidget*> (focusedChild)->ChangeFocus (
+          haveFocus, focusExternal);
+    }
     
     bool OffscreenWidget::DispatchMouseEvent (nsMouseEvent& event)
     {
@@ -654,6 +674,23 @@ namespace OSGK
         return false;
       }
       return true;
+    }
+
+    bool OffscreenWidget::DispatchFocus (PRUint32 aEventType, 
+                                         bool isMozWindowTakingFocus)
+    {
+      nsFocusEvent event(PR_TRUE, aEventType, this);
+
+      //focus and blur event should go to their base widget loc, not current mouse pos
+      event.refPoint.x = 0;
+      event.refPoint.y = 0;
+      event.isMozWindowTakingFocus = isMozWindowTakingFocus;
+
+      nsEventStatus status;
+      DispatchEvent (&event, status);
+      bool result = status != nsEventStatus_eIgnore;
+
+      return result;
     }
 
   } //  namespace Impl

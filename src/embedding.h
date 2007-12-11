@@ -70,6 +70,8 @@ namespace OSGK
       { return directoryService; }
     };
 
+    class Browser;
+
     class Embedding : public BaseObject<OSGK_Embedding>
     {
       int xpcom_init_level;
@@ -89,6 +91,8 @@ namespace OSGK
       void* refKeeperStorage[(sizeof (RefKeeper) + sizeof (void*) - 1) / sizeof (void*)];
       inline RefKeeper& GetRefKeeper()
       { return *(reinterpret_cast<RefKeeper*> (refKeeperStorage)); }
+
+      Browser* focusedBrowser;
     public:
       Embedding (EmbeddingOptions* opt, OSGK_GeckoResult& result);
       ~Embedding();
@@ -103,6 +107,16 @@ namespace OSGK
 
       nsresult RegisterJSGlobal (const char* name, const char* contractID,
         unsigned int flags, BaseString*& previous);
+
+      void FocusBrowser (Browser* browser);
+      void FocusBrowserDefault (Browser* browser)
+      {
+        if (focusedBrowser == 0) FocusBrowser (browser);
+      }
+      void Unfocus (Browser* browser)
+      {
+        if (focusedBrowser == browser) FocusBrowser (0);
+      }
 
       void DebugPrint (const wchar_t* format, ...);
       void DebugPrintV (const wchar_t* format, va_list args);

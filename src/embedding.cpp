@@ -36,6 +36,7 @@
 
 #include "defs_private.h"
 #include "embedding.h"
+#include "OffscreenWidget.h"
 #include "pathutil.h"
 
 #include GECKO_INCLUDE(dom,nsIScriptNameSpaceManager.h)
@@ -76,7 +77,7 @@ namespace OSGK
 #endif
 
     Embedding::Embedding (EmbeddingOptions* opt, 
-      OSGK_GeckoResult& result) : xpcom_init_level (0)
+      OSGK_GeckoResult& result) : xpcom_init_level (0), focusedBrowser (0)
     {
       new (&GetRefKeeper()) RefKeeper;
 
@@ -263,6 +264,15 @@ namespace OSGK
       return rc;
     }
 
+    void Embedding::FocusBrowser (Browser* browser)
+    {
+      if (focusedBrowser != 0)
+        focusedBrowser->DoFocus (false, browser == 0);
+      focusedBrowser = browser;
+      if (focusedBrowser != 0)
+        focusedBrowser->DoFocus (true, false);
+    }
+
     void Embedding::DebugPrint (const wchar_t* format, ...)
     {
       va_list args;
@@ -354,4 +364,9 @@ int osgk_embedding_register_js_global (OSGK_Embedding* embedding,
     delete prevStr;
   if (geckoResult != 0) *geckoResult = rc;
   return NS_SUCCEEDED(rc);
+}
+
+void osgk_embedding_clear_focus (OSGK_Embedding* embedding)
+{
+  static_cast<OSGK::Impl::Embedding*> (embedding)->FocusBrowser (0);
 }

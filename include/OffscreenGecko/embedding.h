@@ -231,6 +231,14 @@ OSGK_EXTERN_C OSGK_API int osgk_embedding_register_js_global (
   unsigned int flags, OSGK_String** previousContract OSGK_DEFAULT_ARG(0),
   OSGK_GeckoResult* geckoResult OSGK_DEFAULT_ARG(0));
 
+/**
+ * Clear focus so no browser is focused. Proper clearing of focus is needed
+ * for some things such as e.g. preventing caret displaying.
+ * \param embedding The embedding object.
+ */
+OSGK_EXTERN_C OSGK_API void osgk_embedding_clear_focus (
+  OSGK_Embedding* embedding);
+
 #ifdef __cplusplus
 
 namespace OSGK
@@ -397,6 +405,14 @@ namespace OSGK
       return ret;
     }
     
+    /**
+     * Clear focus so no browser is focused. Proper clearing of focus is needed
+     * for some things such as e.g. preventing caret displaying.
+     */
+    void ClearFocus ()
+    {
+      osgk_embedding_clear_focus (GetObject ());
+    }
   };
   
 } // namespace OSGK

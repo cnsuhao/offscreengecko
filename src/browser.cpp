@@ -102,6 +102,7 @@ OSGK_Browser* osgk_browser_create (OSGK_Embedding* embedding,
     delete b;
     return 0;
   }
+  static_cast<OSGK::Impl::Embedding*> (embedding)->FocusBrowserDefault (b);
   return b;
 }
   
@@ -154,6 +155,12 @@ void osgk_browser_set_antialias (OSGK_Browser* browser, OSGK_AntiAliasType aaTyp
 OSGK_AntiAliasType osgk_browser_get_antialias (OSGK_Browser* browser)
 {
   return static_cast<OSGK::Impl::Browser*> (browser)->GetAntialias ();
+}
+
+void osgk_browser_focus (OSGK_Browser* browser)
+{
+  OSGK::Impl::Browser* b = static_cast<OSGK::Impl::Browser*> (browser);
+  b->GetEmbedding()->FocusBrowser (b);
 }
 
 namespace OSGK
@@ -254,12 +261,17 @@ namespace OSGK
       surface = new gfxImageSurface (size,
         gfxASurface::ImageFormatARGB32);
 
+      Navigate ("about:blank");
+
       SetAntialias (aaGray);
 
       result = NS_OK;
     }
 
-    Browser::~Browser () {}
+    Browser::~Browser ()
+    {
+      GetEmbedding()->Unfocus (this);
+    }
 
     void Browser::Navigate (const char* uri)
     {
@@ -359,6 +371,11 @@ namespace OSGK
       case gfxContext::MODE_COVERAGE:
         return aaSubpixel;
       }
+    }
+
+    void Browser::DoFocus (bool haveFocus, bool focusExternal)
+    {
+      widget->ChangeFocus (haveFocus, focusExternal);
     }
 
     //-----------------------------------------------------------------------
