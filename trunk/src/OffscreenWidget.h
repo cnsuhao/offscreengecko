@@ -60,11 +60,13 @@ namespace OSGK
     protected:
       bool visible : 1;
       bool enabled : 1;
+      bool focused : 1;
     
       OffscreenWidget* parent;
       Browser* browser;
       nsRefPtr<gfxImageSurface> surface;
       nsCOMPtr<nsIRegion> dirtyRegion;
+      nsIWidget* focusedChild;
 
     #ifdef REPAINT_DUMP
       unsigned int paintCounter;
@@ -117,13 +119,17 @@ namespace OSGK
         if (browser != 0)
         {
           browser->SetFocusedWidget (child);
-          NS_OK;
+          return NS_OK;
         }
         else if (parent != 0)
-          return parent->SetFocusedChild (child);
+        {
+          parent->focusedChild = child;
+          return NS_OK;
+        }
         return NS_ERROR_FAILURE;
       }
       bool DispatchToChild (nsGUIEvent& event);
+      bool DispatchFocus(PRUint32 aEventType, bool isMozWindowTakingFocus);
     public:
       OffscreenWidget();
     
@@ -151,6 +157,29 @@ namespace OSGK
       }
       virtual nsIWidget*      GetParent(void)
       { return parent; }
+
+      void AddChild (nsIWidget* aChild)
+      {
+        nsBaseWidget::AddChild (aChild);
+        if (focusedChild == 0)
+        {
+          focusedChild = aChild;
+          static_cast<OffscreenWidget*> (aChild)->ChangeFocus (true, false);
+        }
+      }
+
+      void RemoveChild(nsIWidget* aChild)
+      {
+        if (focusedChild == aChild)
+        {
+          nsIWidget* newFocus = aChild->GetNextSibling();
+          static_cast<OffscreenWidget*> (aChild)->ChangeFocus (false, newFocus != 0);
+          focusedChild = newFocus;
+          if (newFocus != 0)
+            static_cast<OffscreenWidget*> (newFocus)->ChangeFocus (true, false);
+        }
+        nsBaseWidget::RemoveChild (aChild);
+      }
     
       NS_IMETHOD Show(PRBool aState) { visible = aState != 0; return NS_OK; }
     
@@ -256,6 +285,8 @@ namespace OSGK
         unsigned int keyCode, bool down, bool isChar);
       bool EventKeyPress (const EventHelpers::KeyState& kstate, 
         unsigned int key, bool isChar);
+
+      void ChangeFocus (bool haveFocus, bool focusExternal);
     };
     
   } //  namespace Impl

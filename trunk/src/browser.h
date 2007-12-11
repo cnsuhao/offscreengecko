@@ -94,6 +94,7 @@ namespace OSGK
         this->widget = widget; 
         focusedWidget = widget;
       }
+      OffscreenWidget* GetWidget() const { return widget; }
       void SetFocusedWidget (OffscreenWidget* widget)
       { focusedWidget = widget; }
       Embedding* GetEmbedding() { return embedding; }
@@ -114,6 +115,8 @@ namespace OSGK
       void SetAntialias (OSGK_AntiAliasType aaType);
       OSGK_AntiAliasType GetAntialias ();
       gfxContext::AntialiasMode GetGeckoAA() const { return aaMode; }
+
+      void DoFocus (bool haveFocus, bool focusExternal);
 
       gfxASurface* GetSurface() { return surface; }
       enum
