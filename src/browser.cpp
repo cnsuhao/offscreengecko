@@ -163,6 +163,11 @@ void osgk_browser_focus (OSGK_Browser* browser)
   b->GetEmbedding()->FocusBrowser (b);
 }
 
+void osgk_browser_resize (OSGK_Browser* browser, int width, int height)
+{
+  static_cast<OSGK::Impl::Browser*> (browser)->Resize (width, height);
+}
+
 namespace OSGK
 {
   namespace Impl
@@ -281,13 +286,50 @@ namespace OSGK
 
     const unsigned char* Browser::LockData ()
     {
+      if (lastLock.surface == surface)
+      {
+        lastLock.lockCount++;
+        return lastLock.p;
+      }
+      else if (lastLock.surface != 0)
+      {
+        locks.push_back (lastLock);
+      }
+
       if (updateState == updNeedsUpdate) UpdateBrowser();
       updateState = updClean;
-      return surface->Data();
+      lastLock.surface = surface;
+      lastLock.lockCount = 1;
+      lastLock.p = surface->Data();
+      return lastLock.p;
     }
       
     void Browser::UnlockData (const unsigned char* p)
     {
+      if (lastLock.p == p)
+      {
+        lastLock.lockCount--;
+        if (lastLock.lockCount <= 0)
+        {
+          lastLock.surface = 0;
+          return;
+        }
+      }
+      else
+      {
+        for (LockedBufferVec::iterator lock = locks.begin(); lock < locks.end(); lock++)
+        {
+          if (lock->p == p)
+          {
+            lock->lockCount--;
+            if (lock->lockCount <= 0)
+            {
+              locks.erase (lock);
+            }
+            break;
+          }
+        }
+      }
     }
 
     void Browser::UpdateBrowser()
@@ -376,6 +418,16 @@ namespace OSGK
     void Browser::DoFocus (bool haveFocus, bool focusExternal)
     {
       widget->ChangeFocus (haveFocus, focusExternal);
+    }
+
+    void Browser::Resize (int width, int height)
+    {
+      gfxIntSize size (width, height);
+      surface = new gfxImageSurface (size,
+        gfxASurface::ImageFormatARGB32);
+
+      widget->ResizeFromTheSourceOfPower (width, height);
+      baseWindow->SetSize (width, height, true);
     }
 
     //-----------------------------------------------------------------------
