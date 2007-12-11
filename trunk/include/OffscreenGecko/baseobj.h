@@ -135,10 +135,10 @@ struct OSGK_BaseObject_s
 typedef struct OSGK_BaseObject_s OSGK_BaseObject;
 /** @} */
 
-# define OSGK_DERIVEDTYPE(T)            \
-    typedef struct T ## _s {            \
-      OSGK_BaseObject baseobj;          \
-    } T
+#define OSGK_DERIVEDTYPE(T)           \
+  typedef struct T ## _s {            \
+    OSGK_BaseObject baseobj;          \
+  } T
 
 /**
  * Acquire a reference to an OffscreenGecko object. Returns new reference 
