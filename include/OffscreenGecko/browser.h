@@ -150,6 +150,38 @@ OSGK_EXTERN_C OSGK_API void osgk_browser_event_mouse_button (
   OSGK_Browser* browser, OSGK_MouseButton button, 
   OSGK_MouseButtonEventType eventType);
 
+/// Posssible axes for mouse wheel movement
+typedef enum OSGK_WheelAxis
+{
+  /// Vertical axis (the 'typical' scroll direction)
+  waVertical,
+  /// Horizontal axis (some mice have that)
+  waHorizontal
+} OSGK_WheelAxis;
+
+/// Wheel scrolling direction
+typedef enum OSGK_WheelDirection
+{
+  /// Scroll down (vertical)/right (horizontal)
+  wdPositive,
+  /// Scroll up (vertical)/left (horizontal)
+  wdNegative,
+  /// Scroll a page down (vertical)/right (horizontal)
+  wdPositivePage,
+  /// Scroll a page up (vertical)/left (horizontal)
+  wdNegativePage
+} OSGK_WheelDirection;
+
+/**
+ * Send a mouse wheel event to a browser object.
+ * \param browser The browser object.
+ * \param axis The axis of the scrolled wheel.
+ * \param direction The scroll direction.
+ */
+OSGK_EXTERN_C OSGK_API void osgk_browser_event_mouse_wheel (
+  OSGK_Browser* browser, OSGK_WheelAxis axis, 
+  OSGK_WheelDirection direction);
+
 /** @} */
 
 /**\name Keyboard events
@@ -392,6 +424,16 @@ namespace OSGK
       OSGK_MouseButtonEventType eventType)
     {
       osgk_browser_event_mouse_button (GetObject(), button, eventType);
+    }
+
+    /**
+     * Send a mouse wheel event to the browser object.
+     * \param axis The axis of the scrolled wheel.
+     * \param direction The scroll direction.
+     */
+    void EventMouseWheel (OSGK_WheelAxis axis, OSGK_WheelDirection direction)
+    {
+      osgk_browser_event_mouse_wheel (GetObject(), axis, direction);
     }
     /** @} */
 

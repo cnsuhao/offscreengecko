@@ -123,6 +123,7 @@ namespace OSGK
       void EventMouseMove (int x, int y);
       void EventMouseButton (OSGK_MouseButton button, 
         OSGK_MouseButtonEventType eventType);
+      void EventMouseWheel (OSGK_WheelAxis axis, OSGK_WheelDirection direction);
 
       bool EventKey (unsigned int key, OSGK_KeyboardEventType eventType);
 

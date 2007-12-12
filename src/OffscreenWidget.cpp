@@ -564,6 +564,18 @@ namespace OSGK
       DispatchMouseEvent (event);
     }
 
+    void OffscreenWidget::EventMouseWheel (const EventHelpers::KeyState& kstate, 
+                                           int mouseX, int mouseY,
+                                           int flags, int delta)
+    {
+      nsMouseScrollEvent event (true, NS_MOUSE_SCROLL, this);
+      SetModifierFlags (kstate, event);
+      event.refPoint.MoveTo (mouseX, mouseY);
+      event.flags = flags;
+      event.delta = delta;
+      DispatchMouseEvent (event);
+    }
+
     void OffscreenWidget::SetModifierFlags (const EventHelpers::KeyState& kstate,
                                             nsInputEvent& event)
     {
@@ -642,7 +654,7 @@ namespace OSGK
           haveFocus, focusExternal);
     }
     
-    bool OffscreenWidget::DispatchMouseEvent (nsMouseEvent& event)
+    bool OffscreenWidget::DispatchMouseEvent (nsMouseEvent_base& event)
     {
       if ((event.refPoint.x < mBounds.width)
         && (event.refPoint.y < mBounds.height))
@@ -654,18 +666,21 @@ namespace OSGK
           if ((event.refPoint.x >= osw->mBounds.x)
             && (event.refPoint.y >= osw->mBounds.y))
           {
-            nsMouseEvent newEvent (event);
-            newEvent.widget = child;
-            newEvent.refPoint.x -= osw->mBounds.x;
-            newEvent.refPoint.y -= osw->mBounds.y;
-            if (osw->DispatchMouseEvent (newEvent))
+            nsIWidget* oldWidget = event.widget;
+            event.widget = child;
+            event.refPoint.x -= osw->mBounds.x;
+            event.refPoint.y -= osw->mBounds.y;
+            if (osw->DispatchMouseEvent (event))
               return true;
+            event.widget = oldWidget;
+            event.refPoint.x += osw->mBounds.x;
+            event.refPoint.y += osw->mBounds.y;
           }
           child = child->GetNextSibling();
         }
         nsEventStatus status;
         DispatchEvent (&event, status);
-        return true;
+        return status == nsEventStatus_eConsumeNoDefault;
       }
       return false;
     }

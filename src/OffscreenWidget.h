@@ -113,7 +113,7 @@ namespace OSGK
       bool EventKey (const EventHelpers::KeyState& kstate, 
         unsigned int keyCode, PRUint32 msg, bool isChar, PRUint32 flags = 0);
     
-      bool DispatchMouseEvent (nsMouseEvent& event);
+      bool DispatchMouseEvent (nsMouseEvent_base& event);
       nsresult SetFocusedChild (OffscreenWidget* child)
       {
         if (browser != 0)
@@ -282,6 +282,9 @@ namespace OSGK
       void EventMouseButton (const EventHelpers::KeyState& kstate, 
         int mouseX, int mouseY,
         OSGK_MouseButton button, OSGK_MouseButtonEventType eventType);
+      void EventMouseWheel (const EventHelpers::KeyState& kstate, 
+        int mouseX, int mouseY,
+        int flags, int delta);
 
       bool EventKey (const EventHelpers::KeyState& kstate, 
         unsigned int keyCode, bool down, bool isChar);
