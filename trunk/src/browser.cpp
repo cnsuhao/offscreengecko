@@ -141,6 +141,12 @@ void osgk_browser_event_mouse_button (OSGK_Browser* browser,
   static_cast<OSGK::Impl::Browser*> (browser)->EventMouseButton (button, eventType);
 }
 
+void osgk_browser_event_mouse_wheel (OSGK_Browser* browser, OSGK_WheelAxis axis, 
+  OSGK_WheelDirection direction)
+{
+  static_cast<OSGK::Impl::Browser*> (browser)->EventMouseWheel (axis, direction);
+}
+
 int osgk_browser_event_key (OSGK_Browser* browser, unsigned int key,
   OSGK_KeyboardEventType eventType)
 {
@@ -354,6 +360,34 @@ namespace OSGK
         widget->EventMouseButton (kstate, mouseX, mouseY,
           button, eventType);
       }
+    }
+
+    void Browser::EventMouseWheel (OSGK_WheelAxis axis, 
+                                   OSGK_WheelDirection direction)
+    {
+      int flags = 0, delta = 0;
+      switch (axis)
+      {
+        case waHorizontal: flags = nsMouseScrollEvent::kIsHorizontal; break;
+        case waVertical:   flags = nsMouseScrollEvent::kIsVertical; break;
+        default: return;
+      }
+      switch (direction)
+      {
+        case wdNegativePage:
+          flags |= nsMouseScrollEvent::kIsFullPage;
+        case wdNegative:
+          delta = -1;
+          break;
+        case wdPositivePage:
+          flags |= nsMouseScrollEvent::kIsFullPage;
+        case wdPositive:
+          delta = 1;
+          break;
+        default:
+          return;
+      }
+      widget->EventMouseWheel (kstate, mouseX, mouseY, flags, delta);
     }
 
     bool Browser::EventKey (unsigned int key, OSGK_KeyboardEventType eventType)
