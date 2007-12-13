@@ -1,3 +1,7 @@
+2007-12-13	Frank Richter	<frank.richter@gmail.com>
+
+* Tweak keyboard input to support characters from Alt+/Ctrl+something keys.
+
 2007-12-12	Frank Richter	<frank.richter@gmail.com>
 
 * Mouse wheel events support.
