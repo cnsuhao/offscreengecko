@@ -623,8 +623,23 @@ namespace OSGK
       // Modelled after the behaviour of the Win32 widget code
       if (IsModifier (key)) return ret;
       PRUint32 flags = ret ? NS_EVENT_FLAG_NO_DEFAULT : 0;
-      if (down && EventKey (kstate, key, PRUint32 (NS_KEY_PRESS), isChar, flags))
-        ret = true; // @@@ Correct? Win32 widget seems to ignore that.
+      if (down)
+      {
+        if (EventKey (kstate, key, PRUint32 (NS_KEY_PRESS), isChar, flags))
+          ret = true; // @@@ Correct? Win32 widget seems to ignore that.
+        else if (isChar 
+            && (kstate.Get (EventHelpers::KeyState::ksAlt) 
+              || kstate.Get (EventHelpers::KeyState::ksCtrl)))
+        {
+          /* Quirk: a char with Ctrl or Alt pressed might actually be a
+             normal char from another shift state. If the key wasn't
+             accepted initially send it again without shift states. */
+          EventHelpers::KeyState newState (kstate);
+          newState.ApplyKey (OSGKKey_Alt, false);
+          newState.ApplyKey (OSGKKey_Control, false);
+          ret = EventKey (newState, key, PRUint32 (NS_KEY_PRESS), isChar, flags);
+        }
+      }
       return ret;
     }
 
