@@ -83,6 +83,11 @@ namespace OSGK
     {
       return obj;
     }
+
+    T* operator-> ()
+    {
+      return obj;
+    }
     
     void AttachNew (T* obj)
     {

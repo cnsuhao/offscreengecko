@@ -678,25 +678,25 @@ namespace OSGK
         while (child != 0)
         {
           OffscreenWidget* osw = static_cast<OffscreenWidget*> (child);
-          if ((event.refPoint.x >= osw->mBounds.x)
-            && (event.refPoint.y >= osw->mBounds.y))
-          {
+        if ((event.refPoint.x >= osw->mBounds.x)
+          && (event.refPoint.y >= osw->mBounds.y))
+        {
             nsIWidget* oldWidget = event.widget;
             event.widget = child;
-            event.refPoint.x -= osw->mBounds.x;
-            event.refPoint.y -= osw->mBounds.y;
+          event.refPoint.x -= osw->mBounds.x;
+          event.refPoint.y -= osw->mBounds.y;
             if (osw->DispatchMouseEvent (event))
               return true;
             event.widget = oldWidget;
-            event.refPoint.x += osw->mBounds.x;
-            event.refPoint.y += osw->mBounds.y;
-          }
-          child = child->GetNextSibling();
+          event.refPoint.x += osw->mBounds.x;
+          event.refPoint.y += osw->mBounds.y;
         }
-        nsEventStatus status;
-        DispatchEvent (&event, status);
-        return status == nsEventStatus_eConsumeNoDefault;
+        child = child->GetNextSibling();
       }
+      nsEventStatus status;
+      DispatchEvent (&event, status);
+      return status == nsEventStatus_eConsumeNoDefault;
+    }
       return false;
     }
 
