@@ -231,6 +231,8 @@ OSGK_EXTERN_C OSGK_API int osgk_embedding_register_js_global (
   unsigned int flags, OSGK_String** previousContract OSGK_DEFAULT_ARG(0),
   OSGK_GeckoResult* geckoResult OSGK_DEFAULT_ARG(0));
 
+/**\name Focus helpers
+ * @{ */
 /**
  * Clear focus so no browser is focused. Proper clearing of focus is needed
  * for some things such as e.g. preventing caret displaying.
@@ -238,6 +240,30 @@ OSGK_EXTERN_C OSGK_API int osgk_embedding_register_js_global (
  */
 OSGK_EXTERN_C OSGK_API void osgk_embedding_clear_focus (
   OSGK_Embedding* embedding);
+  
+/**
+ * Enable/disables "auto-focus". Auto-focus means that a browser object will
+ * get focus as soon as any event is sent to it. Proper focus handling is
+ * needed for some things such as e.g. caret handling; automatically giving
+ * the focus to a browser object receiving an event is usually a sufficient
+ * strategy to prevent oddities arising from wrong or lacking focus handling
+ * without burdening you, the user, too much. Auto-focus is by default on.
+ * \param embedding The embedding object.
+ * \param autoFocus Whether to enable(non-null) or disable(null) the 
+ *   auto-focus feature.
+ */
+OSGK_EXTERN_C OSGK_API void osgk_embedding_set_auto_focus (
+  OSGK_Embedding* embedding, int autoFocus);
+  
+/**
+ * Get whether auto-focus is enabled.
+ * \param embedding The embedding object.
+ * \return Whether auto-focus is enabled (non-null) or disabled (null).
+ * \sa osgk_embedding_set_auto_focus
+ */
+OSGK_EXTERN_C OSGK_API int osgk_embedding_get_auto_focus (
+  OSGK_Embedding* embedding);
+/** @} */
 
 #ifdef __cplusplus
 
@@ -405,6 +431,8 @@ namespace OSGK
       return ret;
     }
     
+    /**\name Focus helpers
+     * @{ */
     /**
      * Clear focus so no browser is focused. Proper clearing of focus is needed
      * for some things such as e.g. preventing caret displaying.
@@ -413,6 +441,31 @@ namespace OSGK
     {
       osgk_embedding_clear_focus (GetObject ());
     }
+    
+    /**
+     * Enable/disables "auto-focus". Auto-focus means that a browser object will
+     * get focus as soon as any event is sent to it. Proper focus handling is
+     * needed for some things such as e.g. caret handling; automatically giving
+     * the focus to a browser object receiving an event is usually a sufficient
+     * strategy to prevent oddities arising from wrong or lacking focus handling
+     * without burdening you, the user, too much. Auto-focus is by default on.
+     * \param autoFocus Whether to enable or disable the auto-focus feature.
+     */
+    void SetAutoFocus (bool autoFocus)
+    {
+      osgk_embedding_set_auto_focus (GetObject(), autoFocus);
+    }
+    
+    /**
+     * Get whether auto-focus is enabled.
+     * \return Whether auto-focus is enabled or disabled.
+     * \sa SetAutoFocus
+     */
+    bool GetAutoFocus ()
+    {
+      return osgk_embedding_get_auto_focus (GetObject()) != 0;
+    }
+    /** @} */
   };
   
 } // namespace OSGK

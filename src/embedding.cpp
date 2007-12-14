@@ -77,7 +77,8 @@ namespace OSGK
 #endif
 
     Embedding::Embedding (EmbeddingOptions* opt, 
-      OSGK_GeckoResult& result) : xpcom_init_level (0), focusedBrowser (0)
+      OSGK_GeckoResult& result) : xpcom_init_level (0), focusedBrowser (0),
+        autoFocus (true)
     {
       new (&GetRefKeeper()) RefKeeper;
 
@@ -266,6 +267,8 @@ namespace OSGK
 
     void Embedding::FocusBrowser (Browser* browser)
     {
+      if (focusedBrowser == browser) return;
+
       if (focusedBrowser != 0)
         focusedBrowser->DoFocus (false, browser == 0);
       focusedBrowser = browser;
@@ -369,4 +372,14 @@ int osgk_embedding_register_js_global (OSGK_Embedding* embedding,
 void osgk_embedding_clear_focus (OSGK_Embedding* embedding)
 {
   static_cast<OSGK::Impl::Embedding*> (embedding)->FocusBrowser (0);
+}
+
+void osgk_embedding_set_auto_focus (OSGK_Embedding* embedding, int autoFocus)
+{
+  static_cast<OSGK::Impl::Embedding*> (embedding)->SetAutoFocus (autoFocus != 0);
+}
+  
+int osgk_embedding_get_auto_focus (OSGK_Embedding* embedding)
+{
+  return static_cast<OSGK::Impl::Embedding*> (embedding)->GetAutoFocus ();
 }

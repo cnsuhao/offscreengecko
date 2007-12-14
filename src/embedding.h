@@ -93,6 +93,7 @@ namespace OSGK
       { return *(reinterpret_cast<RefKeeper*> (refKeeperStorage)); }
 
       Browser* focusedBrowser;
+      bool autoFocus;
     public:
       Embedding (EmbeddingOptions* opt, OSGK_GeckoResult& result);
       ~Embedding();
@@ -117,6 +118,14 @@ namespace OSGK
       {
         if (focusedBrowser == browser) FocusBrowser (0);
       }
+      void UpdateAutoFocus (Browser* browser)
+      {
+        if (autoFocus && (focusedBrowser != browser))
+          FocusBrowser (browser);
+      }
+
+      void SetAutoFocus (bool af) { autoFocus = af; }
+      bool GetAutoFocus () const { return autoFocus; }
 
       void DebugPrint (const wchar_t* format, ...);
       void DebugPrintV (const wchar_t* format, va_list args);

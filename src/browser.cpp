@@ -345,6 +345,7 @@ namespace OSGK
 
     void Browser::EventMouseMove (int x, int y)
     {
+      embedding->UpdateAutoFocus (this);
       mouseX = x; mouseY = y;
       if (MouseInside())
       {
@@ -355,6 +356,7 @@ namespace OSGK
     void Browser::EventMouseButton (OSGK_MouseButton button, 
       OSGK_MouseButtonEventType eventType)
     {
+      embedding->UpdateAutoFocus (this);
       if (MouseInside())
       {
         widget->EventMouseButton (kstate, mouseX, mouseY,
@@ -365,6 +367,7 @@ namespace OSGK
     void Browser::EventMouseWheel (OSGK_WheelAxis axis, 
                                    OSGK_WheelDirection direction)
     {
+      embedding->UpdateAutoFocus (this);
       int flags = 0, delta = 0;
       switch (axis)
       {
@@ -392,6 +395,7 @@ namespace OSGK
 
     bool Browser::EventKey (unsigned int key, OSGK_KeyboardEventType eventType)
     {
+      embedding->UpdateAutoFocus (this);
       if (focusedWidget == 0) return false;
 
       bool isChar;
