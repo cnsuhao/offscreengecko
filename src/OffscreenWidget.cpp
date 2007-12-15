@@ -106,7 +106,7 @@ namespace OSGK
     }
 
     OffscreenWidget::OffscreenWidget() : visible (false), enabled (true), 
-      focused (false), parent (0), browser (0), focusedChild (0)
+      focused (false), active (false), parent (0), browser (0), focusedChild (0)
     {
     #ifdef REPAINT_DUMP
       paintCounter = 0;
@@ -518,6 +518,9 @@ namespace OSGK
     void OffscreenWidget::EventMouseMove (const EventHelpers::KeyState& kstate, 
                                           int x, int y)
     {
+      if ((x >= mBounds.width) || (y >= mBounds.height))
+        return;
+
       nsMouseEvent event (true, NS_MOUSE_MOVE, this,
         nsMouseEvent::eReal);
       SetModifierFlags (kstate, event);
@@ -530,6 +533,9 @@ namespace OSGK
                                             OSGK_MouseButton button, 
                                             OSGK_MouseButtonEventType eventType)
     {
+      if ((mouseX >= mBounds.width) || (mouseY >= mBounds.height))
+        return;
+
       unsigned int clickCount = 0;
       PRUint32 msg;
       switch (eventType)
@@ -568,6 +574,9 @@ namespace OSGK
                                            int mouseX, int mouseY,
                                            int flags, int delta)
     {
+      if ((mouseX >= mBounds.width) || (mouseY >= mBounds.height))
+        return;
+
       nsMouseScrollEvent event (true, NS_MOUSE_SCROLL, this);
       SetModifierFlags (kstate, event);
       event.refPoint.MoveTo (mouseX, mouseY);
@@ -657,16 +666,39 @@ namespace OSGK
       if (haveFocus)
       {
         DispatchFocus (NS_GOTFOCUS, true);
-        DispatchFocus (NS_ACTIVATE, true);
+        ChangeActive (true, false);
       }
       else
       {
-        DispatchFocus (NS_DEACTIVATE, !focusExternal);
+        ChangeActive (false, focusExternal);
         DispatchFocus (NS_LOSTFOCUS, !focusExternal);
       }
       if (focusedChild != 0)
         static_cast<OffscreenWidget*> (focusedChild)->ChangeFocus (
           haveFocus, focusExternal);
+    }
+    
+    void OffscreenWidget::ChangeActive (bool isActive, bool focusExternal)
+    {
+      if (active == isActive) return;
+
+      active = isActive;
+      if (isActive)
+      {
+        DispatchFocus (NS_ACTIVATE, true);
+      }
+      else
+      {
+        DispatchFocus (NS_DEACTIVATE, !focusExternal);
+      }
+
+      nsIWidget* child = mFirstChild;
+      while (child != 0)
+      {
+        OffscreenWidget* osw = static_cast<OffscreenWidget*> (child);
+        osw->ChangeActive (isActive, focusExternal);
+        child = child->GetNextSibling();
+      }
     }
     
     bool OffscreenWidget::DispatchMouseEvent (nsMouseEvent_base& event)
