@@ -106,7 +106,6 @@ namespace OSGK
       void SetWidget (OffscreenWidget* widget)
       { 
         this->widget = widget; 
-        focusedWidget = widget;
       }
       OffscreenWidget* GetWidget() const { return widget; }
       void SetFocusedWidget (OffscreenWidget* widget)

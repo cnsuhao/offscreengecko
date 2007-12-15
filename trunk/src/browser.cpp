@@ -444,7 +444,13 @@ namespace OSGK
 
     void Browser::DoFocus (bool haveFocus, bool focusExternal)
     {
-      widget->ChangeFocus (haveFocus, focusExternal);
+      if (focusedWidget != 0)
+        focusedWidget->ChangeFocus (haveFocus, focusExternal);
+      else
+      {
+        static_cast<OffscreenWidget*> (widget->GetFirstChild())->ChangeFocus (
+          haveFocus, focusExternal);
+      }
     }
 
     void Browser::Resize (int width, int height)
