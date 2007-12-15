@@ -671,23 +671,22 @@ namespace OSGK
     
     bool OffscreenWidget::DispatchMouseEvent (nsMouseEvent_base& event)
     {
-      if ((event.refPoint.x < mBounds.width)
-        && (event.refPoint.y < mBounds.height))
+      nsIWidget* child = mFirstChild;
+      while (child != 0)
       {
-        nsIWidget* child = mFirstChild;
-        while (child != 0)
-        {
-          OffscreenWidget* osw = static_cast<OffscreenWidget*> (child);
-        if ((event.refPoint.x >= osw->mBounds.x)
+        OffscreenWidget* osw = static_cast<OffscreenWidget*> (child);
+        if ((osw->visible)
+          && (event.refPoint.x >= osw->mBounds.x)
           && (event.refPoint.y >= osw->mBounds.y))
         {
-            nsIWidget* oldWidget = event.widget;
-            event.widget = child;
           event.refPoint.x -= osw->mBounds.x;
           event.refPoint.y -= osw->mBounds.y;
-            if (osw->DispatchMouseEvent (event))
-              return true;
-            event.widget = oldWidget;
+          if ((event.refPoint.x < osw->mBounds.width)
+              && (event.refPoint.y < osw->mBounds.height))
+          {
+            event.widget = child;
+            return osw->DispatchMouseEvent (event);
+          }
           event.refPoint.x += osw->mBounds.x;
           event.refPoint.y += osw->mBounds.y;
         }
@@ -696,8 +695,6 @@ namespace OSGK
       nsEventStatus status;
       DispatchEvent (&event, status);
       return status == nsEventStatus_eConsumeNoDefault;
-    }
-      return false;
     }
 
     bool OffscreenWidget::DispatchToChild (nsGUIEvent& event)
