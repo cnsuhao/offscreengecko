@@ -227,17 +227,6 @@ namespace OSGK
         return; 
       }
 
-      nsCOMPtr<nsIWebBrowserSetup> setup (do_QueryInterface(webBrowser));  
-      if (setup) 
-      {
-        rv = setup->SetProperty(nsIWebBrowserSetup::SETUP_IS_CHROME_WRAPPER,PR_TRUE); 
-        if (NS_FAILED(rv))
-        {
-          result = rv;
-          return; 
-        }
-      }
-
       baseWindow = do_QueryInterface (webBrowser, &rv);
       if (NS_FAILED(rv))
       {
