@@ -1,5 +1,11 @@
 2007-12-15	Frank Richter	<frank.richter@gmail.com>
 
+* Sanitized mouse event distribution. Now distributes only to the (visible)
+  child directly under the point of the event and not potentially to all
+  widgets that contain the point of the event.
+
+2007-12-15	Frank Richter	<frank.richter@gmail.com>
+
 * Added "auto-focus" feature.
 
 2007-12-13	Frank Richter	<frank.richter@gmail.com>
