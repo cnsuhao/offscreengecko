@@ -1,5 +1,12 @@
 2007-12-15	Frank Richter	<frank.richter@gmail.com>
 
+* Changed the embedded browser object to not be a chrome wrapper any more.
+  (I don't know what "chrome wrapper" exactly does, but it fixes some 
+  rendering issues for some web sites. Also, "no chrome wrapper" fits better
+  to web sites from a nomenclature point of view as well.)
+
+2007-12-15	Frank Richter	<frank.richter@gmail.com>
+
 * Sanitized mouse event distribution. Now distributes only to the (visible)
   child directly under the point of the event and not potentially to all
   widgets that contain the point of the event.
