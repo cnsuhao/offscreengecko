@@ -269,6 +269,11 @@ namespace OSGK
     
       gfxASurface *GetThebesSurface();
 
+      virtual nsIContent* GetLastRollup() { return 0; }
+
+      NS_IMETHOD BeginResizeDrag(nsGUIEvent* aEvent, PRInt32 aHorizontal, PRInt32 aVertical)
+      { return NS_ERROR_NOT_IMPLEMENTED; }
+     
       virtual nsIWidget* GetWidget() { return this; }
 
       void EventMouseMove (const EventHelpers::KeyState& kstate, int x, int y);
