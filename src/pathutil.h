@@ -37,6 +37,7 @@
 #ifndef __PATHUTIL_H__
 #define __PATHUTIL_H__
 
+#include "defs_private.h"
 #include <direct.h>
 #include <string>
 
@@ -48,6 +49,8 @@
 #else
   #define FILE_PATH_SEPARATOR       '/'
 #endif
+
+#include GECKO_INCLUDE(xpcom,nsStringAPI.h)
 
 namespace OSGK
 {
@@ -80,7 +83,23 @@ namespace OSGK
 #endif
     }
 
-    nsresult GetLocalFile (const char* str, nsCOMPtr<nsILocalFile>& localFile);
+    template<typename T>
+    nsresult GetLocalFile (const char* str, T**_retval)
+    {
+      if (str == 0)
+      {
+        *_retval = 0;
+        return NS_ERROR_NULL_POINTER;
+      }
+
+      NS_ConvertASCIItoUTF16 nsPath (str);
+      nsCOMPtr<nsILocalFile> pathObj;
+      nsresult res = NS_NewLocalFile (nsPath, false, getter_AddRefs (pathObj));
+      if (NS_FAILED (res)) return res;
+
+      NS_ADDREF(*_retval = pathObj);
+      return NS_OK;
+    }
   } // namespace Impl
 } // namespace OSGK
 

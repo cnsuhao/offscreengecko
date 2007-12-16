@@ -60,10 +60,14 @@ namespace OSGK
 
     void EmbeddingOptions::AddComponentsPath (const char* path)
     {
-      if (!directoryService)
-        directoryService = new DirectoryService;
+      GetDirectoryServiceOrCreate()->AddComponentsPath (path);
+    }
 
-      directoryService->AddComponentsPath (path);
+    void EmbeddingOptions::SetProfileDir (const char* profileDir,
+                                          const char* localProfileDir)
+    {
+      GetDirectoryServiceOrCreate()->SetProfileDirectory (profileDir);
+      GetDirectoryServiceOrCreate()->SetLocalProfileDirectory (localProfileDir);
     }
 
     //-----------------------------------------------------------------------
@@ -136,6 +140,7 @@ namespace OSGK
       const nsDynamicFunctionLoad xulFuncs[] = {
         {"XRE_InitEmbedding", (NSFuncPtr*)&XRE_InitEmbedding},
         {"XRE_TermEmbedding", (NSFuncPtr*)&XRE_TermEmbedding},
+        {"XRE_NotifyProfile", (NSFuncPtr*)&XRE_NotifyProfile},
         {0, 0}
       };
 
@@ -161,6 +166,9 @@ namespace OSGK
         }
       }
 
+      if (opt && opt->GetDirectoryService())
+        opt->GetDirectoryService()->CreateProfileDirectories ();
+
       res = XRE_InitEmbedding (binPath, 0, 
         opt ? opt->GetDirectoryService() : 0, 0, 0);
       if (NS_FAILED (res))
@@ -170,6 +178,8 @@ namespace OSGK
       }
 
       xpcom_init_level++;
+
+      XRE_NotifyProfile ();
 
       res = NS_GetServiceManager (
         getter_AddRefs (GetRefKeeper().nsServMgr));
@@ -194,6 +204,7 @@ namespace OSGK
         result = res;
         return;
       }
+
       res = components.Register (GetRefKeeper().nsCompReg);
       if (NS_FAILED (res))
       {
@@ -309,6 +320,14 @@ void osgk_embedding_options_add_components_path (OSGK_EmbeddingOptions* options,
                                                  const char* path)
 {
   static_cast<OSGK::Impl::EmbeddingOptions*> (options)->AddComponentsPath (path);
+}
+
+void osgk_embedding_options_set_profile_dir (OSGK_EmbeddingOptions* options, 
+                                             const char* profileDir,
+                                             const char* localProfileDir)
+{
+  static_cast<OSGK::Impl::EmbeddingOptions*> (options)->SetProfileDir (
+    profileDir, localProfileDir);
 }
 
 OSGK_Embedding* osgk_embedding_create2 (unsigned int apiVer, 
