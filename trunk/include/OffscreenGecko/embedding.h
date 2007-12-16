@@ -74,6 +74,27 @@ OSGK_EXTERN_C OSGK_API void osgk_embedding_options_add_search_path (
 OSGK_EXTERN_C OSGK_API void osgk_embedding_options_add_components_path (
   OSGK_EmbeddingOptions* options, const char* path);
 
+/**
+ * Set the profile directory used by XULrunner. This directory stores
+ * persistent data such as caches and preferences.
+ * \param options The embedding options object.
+ * \param profileDir The profile directory.
+ * \param localProfileDir Optionally the "local" profile directory, "local"
+ *   in the sense of machine-local (as opposed to the "normal" profile
+ *   directory which is assumed to be possibly accessed via network). If
+ *   given, the "local" directory is used to store data which would be rather
+ *   large for network transfer and isn't required to "follow" the user around
+ *   (such as caches). If not given the "normal" profile directory is used for
+ *   such data as well.
+ * \remarks A profile directory is optional; XULrunner works without, but 
+ *   obviously preferences can't be stored, and startup may be slower due the
+ *   unavailability of some caches (especially when custom components are used).
+ *   The directory will be created if needed.
+ */
+OSGK_EXTERN_C OSGK_API void osgk_embedding_options_set_profile_dir (
+  OSGK_EmbeddingOptions* options, const char* profileDir,
+  const char* localProfileDir OSGK_DEFAULT_ARG(0) );
+
 #ifdef __cplusplus
 
 namespace OSGK
@@ -112,6 +133,29 @@ namespace OSGK
     void AddComponentsPath (const char* path)
     {
       osgk_embedding_options_add_components_path (GetObject(), path);
+    }
+
+    /**
+     * Set the profile directory used by XULrunner. This directory stores
+     * persistent data such as caches and preferences.
+     * \param profileDir The profile directory.
+     * \param localProfileDir Optionally the "local" profile directory, "local"
+     *   in the sense of machine-local (as opposed to the "normal" profile
+     *   directory which is assumed to be possibly accessed via network). If
+     *   given, the "local" directory is used to store data which would be rather
+     *   large for network transfer and isn't required to "follow" the user around
+     *   (such as caches). If not given the "normal" profile directory is used for
+     *   such data as well.
+     * \remarks A profile directory is optional; XULrunner works without, but 
+     *   obviously preferences can't be stored, and startup may be slower due the
+     *   unavailability of some caches (especially when custom components are used).
+     *   The directory will be created if needed.
+     */
+    void SetProfileDir (const char* profileDir,
+      const char* localProfileDir = 0)
+    {
+      osgk_embedding_options_set_profile_dir (GetObject(), profileDir,
+        localProfileDir);
     }
   };
   

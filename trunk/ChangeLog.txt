@@ -1,5 +1,10 @@
 2007-12-15	Frank Richter	<frank.richter@gmail.com>
 
+* Added support for setting the XULrunner profile directory to store
+  persistent data and caches.
+
+2007-12-15	Frank Richter	<frank.richter@gmail.com>
+
 * Sanitized focus handling; now only one widget has focus (and gets focus
   notifications), not all widgets up in the widget tree.
 

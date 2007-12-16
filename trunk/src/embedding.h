@@ -60,13 +60,21 @@ namespace OSGK
     class EmbeddingOptions : public BaseObject<OSGK_EmbeddingOptions>
     {
       nsRefPtr<DirectoryService> directoryService;
+      DirectoryService* GetDirectoryServiceOrCreate()
+      {
+        if (!directoryService)
+          directoryService = new DirectoryService;
+        return directoryService;
+      }
     public:
       std::vector<std::string> searchPaths;
 
       void AddSearchPath (const char* path);
       void AddComponentsPath (const char* path);
+      void SetProfileDir (const char* profileDir,
+        const char* localProfileDir);
 
-      nsIDirectoryServiceProvider* GetDirectoryService ()
+      DirectoryService* GetDirectoryService ()
       { return directoryService; }
     };
 
@@ -79,6 +87,7 @@ namespace OSGK
 
       XRE_InitEmbeddingType XRE_InitEmbedding;
       XRE_TermEmbeddingType XRE_TermEmbedding;
+      XRE_NotifyProfileType XRE_NotifyProfile;
 
       struct RefKeeper
       {

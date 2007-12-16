@@ -38,8 +38,10 @@
 #include "DirectoryService.h"
 #include "pathutil.h"
 
+#include GECKO_INCLUDE(xpcom,nsAppDirectoryServiceDefs.h)
 #include GECKO_INCLUDE(xpcom,nsDirectoryServiceDefs.h)
 #include GECKO_INCLUDE(xpcom,nsILocalFile.h)
+#include GECKO_INCLUDE(xulapp,nsXULAppAPI.h)
 
 namespace OSGK
 {
@@ -59,12 +61,7 @@ namespace OSGK
     {
       if (!_retval) return NS_ERROR_NULL_POINTER;
 
-      nsCOMPtr<nsILocalFile> pathObj;
-      nsresult res = GetLocalFile (paths[pos++].c_str(), pathObj);
-      if (NS_FAILED (res)) return res;
-
-      NS_ADDREF(*_retval = pathObj);
-      return NS_OK;
+      return GetLocalFile (paths[pos++].c_str(), _retval);
     }
 
     NS_IMPL_ISUPPORTS2(DirectoryService, 
@@ -75,6 +72,33 @@ namespace OSGK
                                              nsIFile **_retval)
     {
       if (!_retval) return NS_ERROR_NULL_POINTER;
+
+      if ((strcmp (prop, NS_APP_USER_PROFILE_50_DIR) == 0)
+        || (strcmp (prop, NS_APP_PROFILE_DIR_STARTUP) == 0))
+      {
+        *persistent = true;
+        if (!profileDir.empty())
+        {
+          nsresult rc = GetLocalFile (profileDir.c_str(), _retval);
+          if (NS_SUCCEEDED(rc)) return NS_OK;
+        }
+      }
+      else if ((strcmp (prop, NS_APP_USER_PROFILE_LOCAL_50_DIR) == 0)
+        || (strcmp (prop, NS_APP_PROFILE_LOCAL_DIR_STARTUP) == 0))
+      {
+        *persistent = true;
+        if (!localProfileDir.empty())
+        {
+          nsresult rc = GetLocalFile (localProfileDir.c_str(), _retval);
+          if (NS_SUCCEEDED(rc)) return NS_OK;
+        }
+        if (!profileDir.empty())
+        {
+          nsresult rc = GetLocalFile (profileDir.c_str(), _retval);
+          if (NS_SUCCEEDED(rc)) return NS_OK;
+        }
+      }
+
       *_retval = 0;
       return NS_ERROR_NOT_AVAILABLE;
     }
@@ -99,6 +123,40 @@ namespace OSGK
       std::string pathStr (path);
       PathExpand (pathStr);
       componentsPaths.push_back (pathStr);
+    }
+
+    void DirectoryService::SetProfileDirectory (const char* path)
+    { 
+      if (path != 0)
+      {
+	profileDir = path; 
+        PathExpand (profileDir);
+      }
+      else
+        profileDir.clear();
+    }
+
+    void DirectoryService::SetLocalProfileDirectory (const char* path)
+    { 
+      if (path != 0)
+      {
+        localProfileDir = path;
+        PathExpand (localProfileDir);
+      }
+      else
+        localProfileDir.clear();
+    }
+
+    void DirectoryService::CreateProfileDirectories ()
+    {
+      PRBool dummy;
+      nsCOMPtr<nsIFile> dir;
+      if (NS_SUCCEEDED (GetFile (NS_APP_PROFILE_DIR_STARTUP,
+          &dummy, getter_AddRefs (dir))))
+        dir->Create (nsIFile::DIRECTORY_TYPE, 0700);
+      if (NS_SUCCEEDED (GetFile (NS_APP_PROFILE_LOCAL_DIR_STARTUP,
+          &dummy, getter_AddRefs (dir))))
+        dir->Create (nsIFile::DIRECTORY_TYPE, 0700);
     }
   } // namespace Impl
 } // namespace OSGK

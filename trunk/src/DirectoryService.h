@@ -63,12 +63,22 @@ namespace OSGK
         NS_DECL_NSISIMPLEENUMERATOR
       };
       StringVec componentsPaths;
+      std::string profileDir;
+      std::string localProfileDir;
     public:
       NS_DECL_ISUPPORTS
       NS_DECL_NSIDIRECTORYSERVICEPROVIDER
       NS_DECL_NSIDIRECTORYSERVICEPROVIDER2
 
       void AddComponentsPath (const char* path);
+      void SetProfileDirectory (const char* path);
+      void SetLocalProfileDirectory (const char* path);
+      const char* GetProfileDirectory () const
+      { return !profileDir.empty() ? profileDir.c_str() : 0; }
+      const char* GetLocalProfileDirectory () const
+      { return !localProfileDir.empty() ? localProfileDir.c_str() : 0; }
+
+      void CreateProfileDirectories ();
     };
   } // namespace Impl
 } // namespace OSGK
