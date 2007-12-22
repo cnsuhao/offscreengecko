@@ -36,7 +36,7 @@
 
 #include "defs_private.h"
 
-#include "wrap_gfxASurface.h"
+#include "wrap_gfxasurface.h"
 
 #include GECKO_INCLUDE(gfx,nsGfxCIID.h)
 #include GECKO_INCLUDE(gfx,nsIDeviceContext.h)

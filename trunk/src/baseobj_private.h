@@ -46,7 +46,7 @@ namespace OSGK
     template<typename T>
     struct BaseObject : public T
     {
-      BaseObject() { baseobj.refCount = 1; }
+      BaseObject() { this->baseobj.refCount = 1; }
       virtual ~BaseObject() {}
 	
       int AddRef() { return osgk_addref (this); }

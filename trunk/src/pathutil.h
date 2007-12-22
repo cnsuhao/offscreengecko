@@ -38,8 +38,12 @@
 #define __PATHUTIL_H__
 
 #include "defs_private.h"
-#include <direct.h>
 #include <string>
+
+#if defined(XP_WIN)
+# include <direct.h>
+# define PATH_MAX MAX_PATH
+#endif
 
 #include GECKO_INCLUDE(xpcom,nscore.h)
 #include GECKO_INCLUDE(xpcom,nsCOMPtr.h)
@@ -73,9 +77,9 @@ namespace OSGK
       path = pathExpanded;
       free (pathExpanded);
 #else
-      char* saveCwd = getcwd (0, MAX_PATH);
+      char* saveCwd = getcwd (0, PATH_MAX);
       chdir (path.c_str());
-      char* newCwd = getcwd (0, MAX_PATH);
+      char* newCwd = getcwd (0, PATH_MAX);
       chdir (saveCwd);
       path = newCwd;
       free (saveCwd);

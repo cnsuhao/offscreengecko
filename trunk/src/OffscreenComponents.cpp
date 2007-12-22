@@ -40,7 +40,6 @@
 #include "defs_private.h"
 
 #include GECKO_INCLUDE(gfx,nsGfxCIID.h)
-#include GECKO_INCLUDE(widget,nsdefs.h)
 #include GECKO_INCLUDE(widget,nsWidgetsCID.h)
 
 #include GECKO_INCLUDE(xpcom,nsIComponentRegistrar.h)

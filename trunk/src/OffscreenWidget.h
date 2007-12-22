@@ -39,7 +39,7 @@
 
 #include "browser.h"
 #include "embedding.h"
-#include "EventHelpers.h"
+#include "eventhelpers.h"
 #include "nsBaseWidget.h"
 
 #include GECKO_INCLUDE(gfx,nsIRegion.h)

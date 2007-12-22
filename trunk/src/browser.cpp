@@ -71,7 +71,7 @@
 
 #include "defs_private.h"
 
-#include "wrap_gfxASurface.h"
+#include "wrap_gfxasurface.h"
 
 #include "browser.h"
 #include "embedding.h"
