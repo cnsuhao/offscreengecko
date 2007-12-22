@@ -1,5 +1,10 @@
 2007-12-22	Frank Richter	<frank.richter@gmail.com>
 
+* CMakeLists tweaks to support building with mozilla.org XULrunner SDK for
+  Linux. Utilize relaytool.
+
+2007-12-22	Frank Richter	<frank.richter@gmail.com>
+
 * GCC compile and Linux build fixes.
 
 2007-12-15	Frank Richter	<frank.richter@gmail.com>
