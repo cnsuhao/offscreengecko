@@ -34,7 +34,9 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-#include "xpcom/nsMemory.h"
+#include "defs_private.h"
+
+#include GECKO_INCLUDE(xpcom,nsMemory.h)
 
 #include "OffscreenGecko/geckomem.h"
 

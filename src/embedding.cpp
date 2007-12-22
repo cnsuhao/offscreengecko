@@ -113,7 +113,7 @@ namespace OSGK
           {"1.9", true, "2.0", false}
         };
 
-        char grePath[MAX_PATH];
+        char grePath[PATH_MAX];
         nsresult res = GRE_GetGREPathWithProperties (supportedGREVersions,
           sizeof (supportedGREVersions) / sizeof (GREVersionRange),
           0, 0,

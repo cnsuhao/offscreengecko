@@ -40,9 +40,13 @@
 #include <stdio.h>
 #include <stdarg.h>
 
-#define GECKO_INCLUDE(dir, header)		_GECKO_INCLUDE_STRINGIZE(dir/header)
 #define _GECKO_INCLUDE_STRINGIZE(X)             _GECKO_INCLUDE_STRINGIZE2(#X)
 #define _GECKO_INCLUDE_STRINGIZE2(X)            X
+#ifdef OSGK_GECKOINC_FLAT
+# define GECKO_INCLUDE(dir, header)		_GECKO_INCLUDE_STRINGIZE(header)
+#else
+# define GECKO_INCLUDE(dir, header)		_GECKO_INCLUDE_STRINGIZE(dir/header)
+#endif
 
 #if defined(_MSC_VER)
   #if _MSC_VER >= 1400
@@ -57,6 +61,8 @@
   #else
     #define snwprintf _snwprintf
   #endif
+#elif !defined(XP_WIN)
+# define snwprintf swprintf
 #endif
 
 #endif // __DEFS_PRIVATE_H__

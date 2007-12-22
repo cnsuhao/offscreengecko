@@ -37,6 +37,7 @@
 #ifndef __DIRECTORYSERVICE_H__
 #define __DIRECTORYSERVICE_H__
 
+#include <string>
 #include <vector>
 
 #include GECKO_INCLUDE(xpcom,nsAutoPtr.h)
