@@ -1,3 +1,7 @@
+2007-12-22	Frank Richter	<frank.richter@gmail.com>
+
+* Gentoo build tweaks.
+
 2007-12-23	Frank Richter	<frank.richter@gmail.com>
 
 * Fix wrong library path collection in relaytool.

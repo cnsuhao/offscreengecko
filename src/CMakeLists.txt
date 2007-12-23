@@ -29,7 +29,7 @@ ENDIF(CMAKE_GENERATOR MATCHES "Visual Studio")
 IF(XULRUNNER_SDK_DIR)
   set(XULRUNNER_INCDIR "${XULRUNNER_SDK_DIR}/include")
   set(XULRUNNER_LIBDIR "${XULRUNNER_SDK_DIR}/lib")
-  set(XULRUNNER_LFLAGS "-lxpcomglue -lxul -lnspr4")
+  set(XULRUNNER_LFLAGS "-lxul -lnspr4")
 ENDIF(XULRUNNER_SDK_DIR)
 
 set(CMAKE_REQUIRED_INCLUDES "${XULRUNNER_INCDIR}")
@@ -49,11 +49,25 @@ CHECK_CXX_SOURCE_COMPILES(
   #include \"nsStringAPI.h\"
   #else
   #include \"xpcom/nsStringAPI.h\"
-  #endif"
+  #endif
+  
+  int main() { return 0; }"
   XULRUNNER_BUILDS_WITHOUT_SHORT_WCHAR)
 IF(NOT XULRUNNER_BUILDS_WITHOUT_SHORT_WCHAR)
   set(XULRUNNER_CFLAGS "${XULRUNNER_CFLAGS} -fshort-wchar")
 ENDIF(NOT XULRUNNER_BUILDS_WITHOUT_SHORT_WCHAR)
+
+set(CMAKE_REQUIRED_INCLUDES "${OffscreenGecko_SOURCE_DIR}/src/" "${OffscreenGecko_SOURCE_DIR}/include/" "${CMAKE_REQUIRED_INCLUDES}")
+CHECK_CXX_SOURCE_COMPILES(
+  "#include \"defs_private.h\"
+  #include GECKO_INCLUDE(xpcom,nsDebug.h)
+  #include \"wrap_gfxasurface.h\"
+  
+  int main() { gfxASurface* surf = 0; surf->Release(); return 0; }"
+  XULRUNNER_LINKS_WITHOUT_THEBES)
+IF(NOT XULRUNNER_LINKS_WITHOUT_THEBES)
+  set(XULRUNNER_LFLAGS "-lthebes ${XULRUNNER_LFLAGS}")
+ENDIF(NOT XULRUNNER_LINKS_WITHOUT_THEBES)
 
 include_directories(${XULRUNNER_INCDIR})
 IF(XULRUNNER_FLAT_INCDIR)
@@ -71,7 +85,7 @@ ENDIF(XULRUNNER_FLAT_INCDIR)
 add_definitions(${XULRUNNER_CFLAGS})
 
 IF(CMAKE_COMPILER_IS_GNUCXX)
-  add_definitions("-fno-rtti")
+  add_definitions("-fno-rtti -ggdb")
   link_libraries("-Wl,--warn-unresolved-symbols")
   link_libraries("-Wl,--as-needed")
 ENDIF(CMAKE_COMPILER_IS_GNUCXX)
@@ -82,7 +96,8 @@ IF(NOT CMAKE_GENERATOR MATCHES "Visual Studio")
     ARGS --relay xul --relay nspr4 -L${XULRUNNER_LIBDIR} ${XULRUNNER_LFLAGS}
     OUTPUT_VARIABLE XULRUNNER_LFLAGS)
 ENDIF(NOT CMAKE_GENERATOR MATCHES "Visual Studio")
-link_libraries("${XULRUNNER_LFLAGS}")
+# -lxpcomglue added manually to work around xpcomglue_s appearing in LFLAGS on gentoo
+link_libraries("-lxpcomglue ${XULRUNNER_LFLAGS}")
 
 add_definitions(-DOSGK_BUILD)
 add_definitions(-DMOZ_CAIRO_GFX)
