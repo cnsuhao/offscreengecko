@@ -77,13 +77,9 @@ namespace OSGK
       path = pathExpanded;
       free (pathExpanded);
 #else
-      char* saveCwd = getcwd (0, PATH_MAX);
-      chdir (path.c_str());
-      char* newCwd = getcwd (0, PATH_MAX);
-      chdir (saveCwd);
-      path = newCwd;
-      free (saveCwd);
-      free (newCwd);
+      char newPath[PATH_MAX];
+      realpath (path.c_str(), newPath);
+      path = newPath;
 #endif
     }
 

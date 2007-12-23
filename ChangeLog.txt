@@ -1,3 +1,7 @@
+2007-12-23	Frank Richter	<frank.richter@gmail.com>
+
+* Use realpath() instead of cwd stuff on non-MSVC platforms.
+
 2007-12-22	Frank Richter	<frank.richter@gmail.com>
 
 * CMakeLists tweaks to support building with mozilla.org XULrunner SDK for
