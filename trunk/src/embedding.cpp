@@ -123,6 +123,8 @@ namespace OSGK
           xpcomState = XPCOMGlueStartup (grePath);
           if (NS_SUCCEEDED (xpcomState)) xpcomPath = grePath;
         }
+        else
+          xpcomState = res;
       }
       if (NS_FAILED (xpcomState))
       {
