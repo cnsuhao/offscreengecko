@@ -1,5 +1,9 @@
 2007-12-23	Frank Richter	<frank.richter@gmail.com>
 
+* Fix wrong library path collection in relaytool.
+
+2007-12-23	Frank Richter	<frank.richter@gmail.com>
+
 * Use realpath() instead of cwd stuff on non-MSVC platforms.
 
 2007-12-22	Frank Richter	<frank.richter@gmail.com>
