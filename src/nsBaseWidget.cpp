@@ -36,6 +36,8 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
+#include "mozilla-config.h"
+
 #include "nsBaseWidget.h"
 #include "nsIDeviceContext.h"
 #include "nsCOMPtr.h"

@@ -99,6 +99,8 @@ namespace OSGK
 
       int mouseX, mouseY;
       bool MouseInside () const { return (mouseX >= 0) && (mouseY >= 0); }
+    
+      void ProcessToolkitEvents();
     public:
       Browser (OSGK_GeckoResult& result, Embedding* embedding,
 	int width, int height);
@@ -115,7 +117,11 @@ namespace OSGK
       Browser* GetBrowser() { return this; }
 
       void Navigate (const char* uri);
-      bool QueryDirty() { return updateState >= updDirty; }
+      bool QueryDirty()
+      {
+        ProcessToolkitEvents();
+        return updateState >= updDirty;
+      }
       const unsigned char* LockData ();
       void UnlockData (const unsigned char* p);
 

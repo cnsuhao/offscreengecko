@@ -38,6 +38,7 @@
  * ***** END LICENSE BLOCK ***** */
 
 #include "defs_private.h"
+#include "mozilla-config.h"
 
 #include GECKO_INCLUDE(gfx,nsGfxCIID.h)
 #include GECKO_INCLUDE(widget,nsWidgetsCID.h)

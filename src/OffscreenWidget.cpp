@@ -35,6 +35,7 @@
  * ***** END LICENSE BLOCK ***** */
 
 #include "defs_private.h"
+#include "mozilla-config.h"
 
 #include "wrap_gfxasurface.h"
 
@@ -263,9 +264,9 @@ namespace OSGK
 #ifdef REPAINT_DUMP
     class AlphaCounter
     {
-      std::wstring s;
+      std::string s;
     public:
-      AlphaCounter () : s(L"a") {}
+      AlphaCounter () : s("a") {}
 
       AlphaCounter& operator++ ()
       {
@@ -273,7 +274,7 @@ namespace OSGK
 
         while (true)
         {
-          wchar_t& ch = s[p];
+          char& ch = s[p];
           ch++;
           if (ch > 'z')
           {
@@ -281,7 +282,7 @@ namespace OSGK
             p++;
             if (p >= s.size())
             {
-              s.append (L"a");
+              s.append ("a");
               break;
             }
           }
@@ -291,7 +292,7 @@ namespace OSGK
         return *this;
       }
 
-      const wchar_t* GetStr() const { return s.c_str(); }
+      const char* GetStr() const { return s.c_str(); }
     };
 #endif
 
@@ -303,13 +304,13 @@ namespace OSGK
       if (dirtyRegion->IsEmpty()) return NS_OK;
 
 #ifdef REPAINT_DUMP
-      wchar_t filename[64];
+      char filename[64];
       std::ofstream tgastream;
       AlphaCounter localCounter;
       if ((surface != 0) && (surface->Data() != 0))
       {
-        snwprintf (filename, sizeof (filename)/sizeof (wchar_t), 
-          L"paint_%08x_%u_%ls.tga", this, paintCounter, localCounter.GetStr());
+        snprintf (filename, sizeof (filename), 
+          "paint_%08x_%u_%s.tga", this, paintCounter, localCounter.GetStr());
         tgastream.open (filename, std::ios::out | std::ios::binary);
         const gfxIntSize& surfSize (surface->GetSize ());
         TGAWriter::WriteBGRAImage (surfSize.width, surfSize.height,
@@ -369,8 +370,8 @@ namespace OSGK
   #ifdef REPAINT_DUMP
         if ((surface != 0) && (surface->Data() != 0))
         {
-          snwprintf (filename, sizeof (filename)/sizeof (wchar_t), 
-            L"paint_%08x_%u_%s.tga", this, paintCounter, localCounter.GetStr());
+          snprintf (filename, sizeof (filename), 
+            "paint_%08x_%u_%s.tga", this, paintCounter, localCounter.GetStr());
           tgastream.open (filename, std::ios::out | std::ios::binary);
           const gfxIntSize& surfSize (surface->GetSize ());
           TGAWriter::WriteBGRAImage (surfSize.width, surfSize.height,
@@ -392,8 +393,8 @@ namespace OSGK
 
       if ((surface != 0) && (surface->Data() != 0))
       {
-        snwprintf (filename, sizeof (filename)/sizeof (wchar_t), 
-          L"paint_%08x_%u_%s.tga", this, paintCounter, localCounter.GetStr());
+        snprintf (filename, sizeof (filename), 
+          "paint_%08x_%u_%s.tga", this, paintCounter, localCounter.GetStr());
         tgastream.open (filename, std::ios::out | std::ios::binary);
         const gfxIntSize& surfSize (surface->GetSize ());
         TGAWriter::WriteBGRAImage (surfSize.width, surfSize.height,
@@ -429,8 +430,8 @@ namespace OSGK
 #ifdef REPAINT_DUMP
       if ((surface != 0) && (surface->Data() != 0))
       {
-        snwprintf (filename, sizeof (filename)/sizeof (wchar_t), 
-          L"paint_%08x_%u_%s.tga", this, paintCounter, localCounter.GetStr());
+        snprintf (filename, sizeof (filename), 
+          "paint_%08x_%u_%s.tga", this, paintCounter, localCounter.GetStr());
         tgastream.open (filename, std::ios::out | std::ios::binary);
         const gfxIntSize& surfSize (surface->GetSize ());
         TGAWriter::WriteBGRAImage (surfSize.width, surfSize.height,

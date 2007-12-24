@@ -1,5 +1,11 @@
 2007-12-24	Frank Richter	<frank.richter@gmail.com>
 
+* Linux compile fixes for repaint dump code.
+* Made browser object process GTK events before dirty queries/updates.
+* Made all files include mozilla-config.h.
+
+2007-12-24	Frank Richter	<frank.richter@gmail.com>
+
 * Call gtk_init() if the XULrunner widget set is GTK2.
 
 2007-12-22	Frank Richter	<frank.richter@gmail.com>

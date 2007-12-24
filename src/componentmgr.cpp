@@ -1,4 +1,6 @@
 #include "defs_private.h"
+#include "mozilla-config.h"
+
 #include "componentmgr.h"
 
 #include "OffscreenGecko/componentmgr.h"

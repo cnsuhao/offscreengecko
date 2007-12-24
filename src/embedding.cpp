@@ -35,6 +35,8 @@
  * ***** END LICENSE BLOCK ***** */
 
 #include "defs_private.h"
+#include "mozilla-config.h"
+
 #include "embedding.h"
 #include "OffscreenWidget.h"
 #include "pathutil.h"
@@ -49,7 +51,7 @@
 #include GECKO_INCLUDE(xpcom,nsServiceManagerUtils.h)
 #include GECKO_INCLUDE(xpcom,nsXPCOMGlue.h)
 
-#ifdef OSGK_INIT_GTK
+#ifdef MOZ_WIDGET_GTK2
 #include "gtk/gtk.h"
 #endif
 
@@ -76,7 +78,7 @@ namespace OSGK
 
     //-----------------------------------------------------------------------
 
-#ifdef OSGK_INIT_GTK
+#ifdef MOZ_WIDGET_GTK2
     class GTKInitializer
     {
       bool gtkInited;
@@ -109,7 +111,7 @@ namespace OSGK
         autoFocus (true)
     {
       new (&GetRefKeeper()) RefKeeper;
-#ifdef OSGK_INIT_GTK
+#ifdef MOZ_WIDGET_GTK2
       gtkInitializer.Init();
 #endif
 
