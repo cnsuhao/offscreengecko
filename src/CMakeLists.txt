@@ -102,7 +102,7 @@ IF(XULRUNNER_WIDGET_GTK2)
 ENDIF(XULRUNNER_WIDGET_GTK2)
 
 IF(CMAKE_COMPILER_IS_GNUCXX)
-  add_definitions("-fno-rtti -ggdb")
+  add_definitions("-fno-rtti -ggdb -fvisibility-inlines-hidden -fvisibility=hidden")
   link_libraries("-Wl,--warn-unresolved-symbols")
   link_libraries("-Wl,--as-needed")
 ENDIF(CMAKE_COMPILER_IS_GNUCXX)
