@@ -35,6 +35,8 @@
  * ***** END LICENSE BLOCK ***** */
 
 #include "defs_private.h"
+#include "mozilla-config.h"
+
 #include "OffscreenDeviceContext.h"
 
 NS_IMPL_ADDREF(OffscreenDeviceContext)

@@ -70,6 +70,7 @@
  * ***** END LICENSE BLOCK ***** */
 
 #include "defs_private.h"
+#include "mozilla-config.h"
 
 #include "wrap_gfxasurface.h"
 
@@ -86,6 +87,10 @@
 #include GECKO_INCLUDE(xpcom,nsIWeakReferenceUtils.h)
 #include GECKO_INCLUDE(xpcom,nsStringAPI.h)
 #include GECKO_INCLUDE(xpcom,nsWeakReference.h)
+
+#ifdef MOZ_WIDGET_GTK2
+#include "gtk/gtk.h"
+#endif
 
 /* Depends on whether a modification I made to gecko makes it into the source -
    see https://bugzilla.mozilla.org/show_bug.cgi?id=407531 */
@@ -273,6 +278,13 @@ namespace OSGK
       GetEmbedding()->Unfocus (this);
     }
 
+    void Browser::ProcessToolkitEvents()
+    {
+    #ifdef MOZ_WIDGET_GTK2
+      gtk_main_iteration_do (FALSE);
+    #endif
+    }
+    
     void Browser::Navigate (const char* uri)
     {
       webNav->LoadURI (NS_ConvertUTF8toUTF16 (uri).get(), 
@@ -290,6 +302,7 @@ namespace OSGK
       {
         locks.push_back (lastLock);
       }
+      ProcessToolkitEvents ();
 
       if (updateState == updNeedsUpdate) UpdateBrowser();
       updateState = updClean;

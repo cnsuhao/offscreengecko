@@ -35,6 +35,7 @@
  * ***** END LICENSE BLOCK ***** */
 
 #include "defs_private.h"
+#include "mozilla-config.h"
 
 #include "eventhelpers.h"
 #include "OffscreenGecko/browser.h"
