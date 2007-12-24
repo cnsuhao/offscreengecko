@@ -1,5 +1,9 @@
 2007-12-24	Frank Richter	<frank.richter@gmail.com>
 
+* Specify 'hidden' visibility flags when building with gcc.
+
+2007-12-24	Frank Richter	<frank.richter@gmail.com>
+
 * Linux compile fixes for repaint dump code.
 * Made browser object process GTK events before dirty queries/updates.
 * Made all files include mozilla-config.h.
