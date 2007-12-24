@@ -84,6 +84,24 @@ ELSE(XULRUNNER_FLAT_INCDIR)
 ENDIF(XULRUNNER_FLAT_INCDIR)
 add_definitions(${XULRUNNER_CFLAGS})
 
+CHECK_CXX_SOURCE_COMPILES(
+  "#include \"mozilla-config.h\"
+  
+  #ifndef MOZ_WIDGET_GTK2
+  bomb out!
+  #endif
+  
+  int main() { return 0; }"
+  XULRUNNER_WIDGET_GTK2)
+IF(XULRUNNER_WIDGET_GTK2)
+  PKGCONFIG(gtk+-2.0 GTK_INCDIR GTK_LIBDIR GTK_LFLAGS GTK_CFLAGS)
+  include_directories(${GTK_INCDIR})
+  add_definitions(${GTK_CFLAGS})
+  add_definitions("-DOSGK_INIT_GTK")
+  link_directories(${GTK_LIBDIR})
+  link_libraries(${GTK_LFLAGS})
+ENDIF(XULRUNNER_WIDGET_GTK2)
+
 IF(CMAKE_COMPILER_IS_GNUCXX)
   add_definitions("-fno-rtti -ggdb")
   link_libraries("-Wl,--warn-unresolved-symbols")

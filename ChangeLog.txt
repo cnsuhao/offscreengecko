@@ -1,3 +1,7 @@
+2007-12-24	Frank Richter	<frank.richter@gmail.com>
+
+* Call gtk_init() if the XULrunner widget set is GTK2.
+
 2007-12-22	Frank Richter	<frank.richter@gmail.com>
 
 * Gentoo build tweaks.

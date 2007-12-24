@@ -49,6 +49,10 @@
 #include GECKO_INCLUDE(xpcom,nsServiceManagerUtils.h)
 #include GECKO_INCLUDE(xpcom,nsXPCOMGlue.h)
 
+#ifdef OSGK_INIT_GTK
+#include "gtk/gtk.h"
+#endif
+
 namespace OSGK
 {
   namespace Impl
@@ -72,6 +76,26 @@ namespace OSGK
 
     //-----------------------------------------------------------------------
 
+#ifdef OSGK_INIT_GTK
+    class GTKInitializer
+    {
+      bool gtkInited;
+    public:
+      GTKInitializer() : gtkInited (false) {}
+      
+      void Init()
+      {
+        if (!gtkInited)
+        {
+          int fake_argc = 0;
+          char** fake_argv = 0;
+          gtk_init (&fake_argc, &fake_argv);
+        }
+      }
+    };
+    static GTKInitializer gtkInitializer;
+#endif
+
 // From nsXPCOMPrivate.h. Copied here for XPCOM_DLL
 #if defined(XP_WIN) || defined(XP_OS2) || defined(WINCE)
 #define XPCOM_DLL         "xpcom.dll"
@@ -85,6 +109,9 @@ namespace OSGK
         autoFocus (true)
     {
       new (&GetRefKeeper()) RefKeeper;
+#ifdef OSGK_INIT_GTK
+      gtkInitializer.Init();
+#endif
 
       nsresult xpcomState = NS_ERROR_NOT_AVAILABLE;
       std::string xpcomPath;
