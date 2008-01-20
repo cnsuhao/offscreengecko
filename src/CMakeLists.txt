@@ -44,18 +44,21 @@ IF(XULRUNNER_FLAT_INCDIR)
   add_definitions(-DOSGK_GECKOINC_FLAT)
   set(CMAKE_REQUIRED_DEFINITIONS "${CMAKE_REQUIRED_DEFINITIONS} -DOSGK_GECKOINC_FLAT")
 ENDIF(XULRUNNER_FLAT_INCDIR)
-CHECK_CXX_SOURCE_COMPILES(
-  "#if defined(OSGK_GECKOINC_FLAT)
-  #include \"nsStringAPI.h\"
-  #else
-  #include \"xpcom/nsStringAPI.h\"
-  #endif
-  
-  int main() { return 0; }"
-  XULRUNNER_BUILDS_WITHOUT_SHORT_WCHAR)
-IF(NOT XULRUNNER_BUILDS_WITHOUT_SHORT_WCHAR)
-  set(XULRUNNER_CFLAGS "${XULRUNNER_CFLAGS} -fshort-wchar")
-ENDIF(NOT XULRUNNER_BUILDS_WITHOUT_SHORT_WCHAR)
+
+IF(NOT CMAKE_GENERATOR MATCHES "Visual Studio")
+  CHECK_CXX_SOURCE_COMPILES(
+    "#if defined(OSGK_GECKOINC_FLAT)
+    #include \"nsStringAPI.h\"
+    #else
+    #include \"xpcom/nsStringAPI.h\"
+    #endif
+    
+    int main() { return 0; }"
+    XULRUNNER_BUILDS_WITHOUT_SHORT_WCHAR)
+  IF(NOT XULRUNNER_BUILDS_WITHOUT_SHORT_WCHAR)
+    set(XULRUNNER_CFLAGS "${XULRUNNER_CFLAGS} -fshort-wchar")
+  ENDIF(NOT XULRUNNER_BUILDS_WITHOUT_SHORT_WCHAR)
+ENDIF(NOT CMAKE_GENERATOR MATCHES "Visual Studio")
 
 set(CMAKE_REQUIRED_INCLUDES "${OffscreenGecko_SOURCE_DIR}/src/" "${OffscreenGecko_SOURCE_DIR}/include/" "${CMAKE_REQUIRED_INCLUDES}")
 CHECK_CXX_SOURCE_COMPILES(
@@ -112,9 +115,9 @@ IF(NOT CMAKE_GENERATOR MATCHES "Visual Studio")
   EXEC_PROGRAM(${OffscreenGecko_SOURCE_DIR}/bin/relaytool out
     ARGS --relay xul --relay nspr4 -L${XULRUNNER_LIBDIR} ${XULRUNNER_LFLAGS}
     OUTPUT_VARIABLE XULRUNNER_LFLAGS)
+  # -lxpcomglue added manually to work around xpcomglue_s appearing in LFLAGS on gentoo
+  link_libraries("-lxpcomglue ${XULRUNNER_LFLAGS}")
 ENDIF(NOT CMAKE_GENERATOR MATCHES "Visual Studio")
-# -lxpcomglue added manually to work around xpcomglue_s appearing in LFLAGS on gentoo
-link_libraries("-lxpcomglue ${XULRUNNER_LFLAGS}")
 
 add_definitions(-DOSGK_BUILD)
 add_definitions(-DMOZ_CAIRO_GFX)
@@ -129,8 +132,8 @@ IF(NOT CMAKE_GENERATOR MATCHES "Visual Studio")
 ENDIF(NOT CMAKE_GENERATOR MATCHES "Visual Studio")
 
 IF(CMAKE_GENERATOR MATCHES "Visual Studio")
-  #target_link_libraries(OffscreenGecko 
-  #  xpcomglue.lib xul.lib nspr4.lib)
+  target_link_libraries(OffscreenGecko 
+    xpcomglue.lib xul.lib nspr4.lib)
   target_link_libraries(OffscreenGecko 
     delayimp.lib)
   set_target_properties (OffscreenGecko PROPERTIES
