@@ -94,6 +94,15 @@ namespace OSGK
       }
       ScriptVariant (unsigned int val, bool isChar) : dataType (svtChar)
       { charVal = val; }
+
+      bool GetString (OSGK_String*& val)
+      {
+        if (dataType != svtString) return false;
+        val = stringVal;
+        return true;
+      }
+      ScriptVariant (OSGK_String* val) : dataType (svtString)
+      { stringVal = val; osgk_addref (stringVal); }
     };
   } // namespace Impl
 } // namespace OSGK
