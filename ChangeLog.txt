@@ -1,5 +1,10 @@
 2007-01-22	Frank Richter	<frank.richter@gmail.com>
 
+* The owning browser object is now passed along when a script template is
+  instantiated.
+
+2007-01-22	Frank Richter	<frank.richter@gmail.com>
+
 * Added ability to attach user data to browser objects.
 
 2007-01-22	Frank Richter	<frank.richter@gmail.com>

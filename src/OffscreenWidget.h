@@ -81,21 +81,6 @@ namespace OSGK
 	nsIAppShell *aAppShell = nsnull, nsIToolkit *aToolkit = nsnull,
 	nsWidgetInitData *aInitData = nsnull);
 
-      Embedding* GetEmbedding()
-      {
-        if (browser != 0)
-          return browser->GetEmbedding();
-        else
-          return parent->GetEmbedding();
-      }
-      Browser* GetTopBrowser()
-      {
-        if (browser != 0)
-          return browser;
-        else if (parent != 0)
-          return parent->GetTopBrowser();
-        return 0;
-      }
       void DebugPrint (const wchar_t* format, ...)
       {
       #ifdef _DEBUG
@@ -134,6 +119,22 @@ namespace OSGK
     public:
       OffscreenWidget();
     
+      Embedding* GetEmbedding()
+      {
+        if (browser != 0)
+          return browser->GetEmbedding();
+        else
+          return parent->GetEmbedding();
+      }
+      Browser* GetTopBrowser()
+      {
+        if (browser != 0)
+          return browser;
+        else if (parent != 0)
+          return parent->GetTopBrowser();
+        return 0;
+      }
+
       NS_IMETHOD Create(nsIWidget        *aParent,
 			const nsRect     &aRect,
 			EVENT_CALLBACK   aHandleEventFunction,

@@ -41,6 +41,7 @@
  */
 
 #include "baseobj.h"
+#include "browser.h"
 #include "scriptvariant.h"
 
 OSGK_DERIVEDTYPE(OSGK_ScriptObjectTemplate);
@@ -54,6 +55,7 @@ typedef enum OSGK_ScriptResult
 typedef struct OSGK_ScriptObjectCreateParams_s
 {
   void* createParam;
+  OSGK_Browser* browser;
 } OSGK_ScriptObjectCreateParams;
 
 typedef OSGK_ScriptResult (*OSGK_CreateObjFunc) (
