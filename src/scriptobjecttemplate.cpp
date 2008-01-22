@@ -370,8 +370,8 @@ namespace OSGK
     ScriptObjectTemplate::ScriptObjectTemplate (Embedding& embedding,
       OSGK_CreateObjFunc createFunc, 
       OSGK_DestroyObjFunc destroyFunc, void* createParam) : 
-      embedding (embedding), createFunc (createFunc),
-      destroyFunc (destroyFunc), createParam (createParam) 
+      embedding (embedding), createFunc (createFunc), destroyFunc (destroyFunc),
+      createParam (createParam) 
     {
       char buf[128];
       _snprintf (buf, sizeof (buf), "@offscreengecko/template-%x;1", this);
@@ -389,7 +389,9 @@ namespace OSGK
 
     ScriptObjectTemplate::~ScriptObjectTemplate()
     {
-      embedding.GetComponentMgr ()->UnregisterXPCOMFactory (classID, factory);
+      ComponentMgr* compmgr = embedding.GetComponentMgr ();
+      if (compmgr != 0) // Can get 0 during shutdown
+        compmgr->UnregisterXPCOMFactory (classID, factory);
     }
 
     bool ScriptObjectTemplate::AddProperty (const char* propName, void* propTag,
