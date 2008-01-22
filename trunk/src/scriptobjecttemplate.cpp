@@ -40,12 +40,16 @@
 
 #include "componentmgr.h"
 #include "embedding.h"
+#include "OffscreenWidget.h"
 #include "scriptobjecttemplate.h"
 #include "scriptvariant.h"
 
+#include GECKO_INCLUDE(docshell,nsIDocShell.h)
 #include GECKO_INCLUDE(dom,nsIScriptNameSpaceManager.h)
+#include GECKO_INCLUDE(dom,nsPIDOMWindow.h)
 #include GECKO_INCLUDE(js,jsapi.h)
 #include GECKO_INCLUDE(js,jsobj.h)
+#include GECKO_INCLUDE(widget,nsIBaseWindow.h)
 #include GECKO_INCLUDE(xpcom,nsComponentManagerUtils.h)
 #include GECKO_INCLUDE(xpcom,nsICategoryManager.h)
 #include GECKO_INCLUDE(xpcom,nsIUUIDGenerator.h)
@@ -134,7 +138,6 @@ namespace OSGK
         methTag (methTag) {}
 
       NS_DECL_ISUPPORTS
-      //NS_DECL_NSISECURITYCHECKEDCOMPONENT
       NS_DECL_NSIXPCSCRIPTABLE
 
       struct nsMemory
@@ -223,6 +226,8 @@ namespace OSGK
     // The nsIXPCScriptable map declaration that will generate stubs for us...
     #define XPC_MAP_CLASSNAME           ScriptObjectTemplate::ScriptObject
     #define XPC_MAP_QUOTED_CLASSNAME   "OSGK::ScriptObjectTemplate::ScriptObject"
+    #define                             XPC_MAP_WANT_PRECREATE
+    #define                             XPC_MAP_WANT_POSTCREATE
     #define                             XPC_MAP_WANT_NEWRESOLVE
     #define                             XPC_MAP_WANT_GETPROPERTY
     #define                             XPC_MAP_WANT_SETPROPERTY
@@ -233,22 +238,68 @@ namespace OSGK
     #undef Clone
 
     NS_IMPL_ISUPPORTS1(ScriptObjectTemplate::ScriptObject, 
-                       //nsISecurityCheckedComponent,
                        nsIXPCScriptable)
 
     ScriptObjectTemplate::ScriptObject::ScriptObject (
-      ScriptObjectTemplate* templ) : templ (templ)
+      ScriptObjectTemplate* templ) : templ (templ), browser (0),
+      created (false)
     {
       objTag = this;
-
-      OSGK_ScriptObjectCreateParams createParm;
-      createParm.createParam = templ->createParam;
-      if (templ->createFunc != 0) templ->createFunc (&createParm, &objTag);
     }
 
     ScriptObjectTemplate::ScriptObject::~ScriptObject ()
     {
-      if (templ->destroyFunc != 0) templ->destroyFunc (objTag);
+      if (created && (templ->destroyFunc != 0)) templ->destroyFunc (objTag);
+    }
+
+    NS_IMETHODIMP ScriptObjectTemplate::ScriptObject::PreCreate(nsISupports *nativeObj, 
+      JSContext * cx, JSObject * globalObj, JSObject * *parentObj)
+    {
+      *parentObj = globalObj;
+
+      nsCOMPtr<nsIXPConnect> xpconnect (do_GetService("@mozilla.org/js/xpc/XPConnect;1"));
+      nsCOMPtr<nsIXPConnectWrappedNative> wrapper;
+      nsresult rv = xpconnect->GetWrappedNativeOfJSObject(cx, globalObj,
+                                                          getter_AddRefs(wrapper));
+      if (NS_FAILED(rv)) {
+        return NS_OK;
+      }
+
+      nsCOMPtr<nsPIDOMWindow> piwin = do_QueryWrappedNative(wrapper);
+
+      if (!piwin) {
+        return NS_OK;
+      }
+
+      nsCOMPtr<nsIDocShell> docshell = piwin->GetDocShell();
+      if (!docshell) return NS_OK;
+
+      nsCOMPtr<nsIBaseWindow> basewin = do_QueryInterface (docshell);
+      if (!basewin)
+        return NS_OK;
+
+      nsCOMPtr<nsIWidget> mainWidget;
+      if (NS_FAILED (basewin->GetMainWidget (getter_AddRefs (mainWidget))))
+        return NS_OK;
+
+      OffscreenWidget* myWidget = static_cast<OffscreenWidget*> (mainWidget.get());
+      browser = myWidget->GetTopBrowser();
+
+      return NS_OK;
+    }
+
+    NS_IMETHODIMP ScriptObjectTemplate::ScriptObject::PostCreate(nsIXPConnectWrappedNative *wrapper, 
+      JSContext * cx, JSObject * obj)
+    {
+      OSGK_ScriptObjectCreateParams createParm;
+      createParm.createParam = templ->createParam;
+      createParm.browser = browser;
+      if (templ->createFunc != 0) 
+        created = NS_SUCCEEDED (templ->createFunc (&createParm, &objTag));
+      else
+        created = true;
+
+      return NS_OK;
     }
 
     NS_IMETHODIMP

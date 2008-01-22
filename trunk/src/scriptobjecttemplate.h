@@ -120,6 +120,8 @@ namespace OSGK
       {
         Ref<ScriptObjectTemplate> templ;
         void* objTag;
+        Browser* browser;
+        bool created;
       public:
         ScriptObject (ScriptObjectTemplate* templ);
         ~ScriptObject ();
