@@ -312,6 +312,37 @@ OSGK_EXTERN_C OSGK_API void osgk_browser_focus (OSGK_Browser* browser);
 OSGK_EXTERN_C OSGK_API void osgk_browser_resize (OSGK_Browser* browser,
   int width, int height);
 
+/**\name User data
+ * Allows to attach arbitrary user data to a browser object.
+ * @{ */
+
+/**
+ * Set a user data value on a browser object.
+ * \param browser The browser object.
+ * \param key The key by which the user data is identified.
+ * \param data The user data value.
+ * \param overrideData Whether to replace the user data if some data
+ *   was already associated with the given key. If non-zero, any
+ *   existing data will replaced with the given value and success is
+ *   returned. If zero, any existing data will not be replaced, and
+ *   failure is returned when some data was already set.
+ * \returns Whether setting the user data value was successful (non-zero)
+ *   or not (zero).
+ */
+OSGK_EXTERN_C OSGK_API int osgk_browser_set_user_data (OSGK_Browser* browser,
+  unsigned int key, void* data, int overrideData OSGK_DEFAULT_ARG(0));
+/**
+ * Get a user data value from a browser object.
+ * \param browser The browser object.
+ * \param key The key by which the user data is identified.
+ * \param data Pointer to the variable to receive the user data.
+ * \returns Whether getting the user data value was successful (non-zero)
+ *   or not (zero).
+ */
+OSGK_EXTERN_C OSGK_API int osgk_browser_get_user_data (OSGK_Browser* browser,
+  unsigned int key, void** data);
+/** @} */
+
 #ifdef __cplusplus
 namespace OSGK
 {
@@ -492,6 +523,39 @@ namespace OSGK
     {
       osgk_browser_resize (GetObject(), width, height);
     }
+
+    /**\name User data
+     * Allows to attach arbitrary user data to the browser object.
+     * @{ */
+
+    /**
+     * Set a user data value.
+     * \param key The key by which the user data is identified.
+     * \param data The user data value.
+     * \param overrideData Whether to replace the user data if some data
+     *   was already associated with the given key. If non-zero, any
+     *   existing data will replaced with the given value and success is
+     *   returned. If zero, any existing data will not be replaced, and
+     *   failure is returned when some data was already set.
+     * \returns Whether setting the user data value was successful (non-zero)
+     *   or not (zero).
+     */
+    bool SetUserData (unsigned int key, void* data, bool overrideData = false)
+    {
+      return osgk_browser_set_user_data (GetObject(), key, data, overrideData) != 0;
+    }
+    /**
+     * Get a user data value.
+     * \param key The key by which the user data is identified.
+     * \param data Pointer to the variable to receive the user data.
+     * \returns Whether getting the user data value was successful (non-zero)
+     *   or not (zero).
+     */
+    bool GetUserData (unsigned int key, void*& data)
+    {
+      return osgk_browser_get_user_data (GetObject(), key, &data) != 0;
+    }
+    /** @} */
   };
   
 } // namespace OSGK

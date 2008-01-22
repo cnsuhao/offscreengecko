@@ -57,6 +57,7 @@
 #include GECKO_INCLUDE(xpcom,nsCOMPtr.h)
 #include GECKO_INCLUDE(xpcom,nsIInterfaceRequestor.h)
 
+#include "stl_hash_map"
 #include <vector>
 
 namespace OSGK
@@ -101,6 +102,14 @@ namespace OSGK
       bool MouseInside () const { return (mouseX >= 0) && (mouseY >= 0); }
     
       void ProcessToolkitEvents();
+
+      typedef stdext::hash_map<unsigned int, void*> UserDataHash;
+      UserDataHash* userData;
+      UserDataHash& GetUserDataHash()
+      {
+        if (userData == 0) userData = new UserDataHash;
+        return *userData;
+      }
     public:
       Browser (OSGK_GeckoResult& result, Embedding* embedding,
 	int width, int height);
@@ -139,6 +148,9 @@ namespace OSGK
       void DoFocus (bool haveFocus, bool focusExternal);
 
       void Resize (int width, int height);
+
+      bool SetUserData (unsigned int key, void* data, bool overrideData);
+      bool GetUserData (unsigned int key, void*& data);
 
       gfxASurface* GetSurface() { return surface; }
       enum
