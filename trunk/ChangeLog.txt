@@ -1,5 +1,10 @@
 2007-01-22	Frank Richter	<frank.richter@gmail.com>
 
+* Fix a clean up issue: destroying a script object factory could have accessed
+  an already freed component manager.
+
+2007-01-22	Frank Richter	<frank.richter@gmail.com>
+
 * Add scripting support: it's possible to create "templates" for scripting
   objects which can be associated to globals in scripting (ie when a script
   requests a global, an actual object is instantiated from the template).

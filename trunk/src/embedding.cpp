@@ -242,31 +242,42 @@ namespace OSGK
         result = res;
         return;
       }
+      
+      xpcom_init_level++;
 
       result = NS_OK;
     }
 
     Embedding::~Embedding()
     {
+      if (xpcom_init_level >= 3) xpcom_init_level--;
+
       GetRefKeeper().~RefKeeper();
+      memset (refKeeperStorage, 0, sizeof (refKeeperStorage));
 
       if (xpcom_init_level >= 2)
+      {
+        xpcom_init_level--;
         XRE_TermEmbedding ();
+      }
 
       if (xpcom_init_level >= 1)
+      {
+        xpcom_init_level--;
         XPCOMGlueShutdown ();
+      }
     }
 
     GeckoMem* Embedding::GetGeckoMem ()
     {
-      if (!GetRefKeeper().geckoMem)
+      if (!GetRefKeeper().geckoMem && (xpcom_init_level >= 3))
         GetRefKeeper().geckoMem.AttachNew (new GeckoMem);
       return GetRefKeeper().geckoMem;
     }
 
     ComponentMgr* Embedding::GetComponentMgr ()
     {
-      if (!GetRefKeeper().compMgr)
+      if (!GetRefKeeper().compMgr && (xpcom_init_level >= 3))
         GetRefKeeper().compMgr.AttachNew (new ComponentMgr);
       return GetRefKeeper().compMgr;
     }
