@@ -38,6 +38,7 @@
 #define __STRING_H__
 
 #include "baseobj_private.h"
+#include <string>
 
 #include GECKO_INCLUDE(xpcom,nsStringAPI.h)
 
@@ -60,6 +61,15 @@ namespace OSGK
       nsCString& GetNSCStr () { return nsstr; }
 
       const char* Get() { return nsstr.get(); }
+    };
+
+    class Str_WrapStdStr : public BaseString
+    {
+      std::string s;
+    public:
+      Str_WrapStdStr (const char* str) : s (str) {}
+
+      const char* Get() { return s.c_str(); }
     };
   } // namespace Impl
 } // namespace OSGK

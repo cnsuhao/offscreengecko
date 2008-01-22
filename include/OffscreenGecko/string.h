@@ -55,6 +55,12 @@ OSGK_DERIVEDTYPE(OSGK_String);
  */
 OSGK_EXTERN_C OSGK_API const char* osgk_string_get (OSGK_String* str);
 
+/**
+ * Create a new OSGK string from a given UTF-8 C string.
+ * \param str The UTF-8 C string from which to create the OSGK string.
+ */
+OSGK_EXTERN_C OSGK_API OSGK_String* osgk_string_create (const char* str);
+
 #ifdef __cplusplus
 
 namespace OSGK
@@ -64,13 +70,19 @@ namespace OSGK
    */
   struct String : public CXXAPI::Wrap<OSGK_String>
   {
+    /**
+     * Create a new OSGK string from a given UTF-8 C string.
+     * \param str The UTF-8 C string from which to create the OSGK string.
+     */
+    String (const char* str) : WrapperType (osgk_string_create (str)) { }
+
     explicit String (WrappedType* obj) : WrapperType (obj) {}
     String& operator=(const String& other)
     {
       WrapperType::operator=(other);
       return *this;
     }
-
+    
     //@{
     /**
      * Get the string data.
