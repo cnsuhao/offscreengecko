@@ -78,6 +78,7 @@ IF(XULRUNNER_FLAT_INCDIR)
 ELSE(XULRUNNER_FLAT_INCDIR)
   include_directories(${XULRUNNER_INCDIR}/dom)
   include_directories(${XULRUNNER_INCDIR}/gfx)
+  include_directories(${XULRUNNER_INCDIR}/js)
   include_directories(${XULRUNNER_INCDIR}/nspr)
   include_directories(${XULRUNNER_INCDIR}/pref)
   include_directories(${XULRUNNER_INCDIR}/string)
@@ -133,10 +134,10 @@ ENDIF(NOT CMAKE_GENERATOR MATCHES "Visual Studio")
 
 IF(CMAKE_GENERATOR MATCHES "Visual Studio")
   target_link_libraries(OffscreenGecko 
-    xpcomglue.lib xul.lib nspr4.lib)
+    xpcomglue.lib xul.lib nspr4.lib js3250.lib)
   target_link_libraries(OffscreenGecko 
     delayimp.lib)
   set_target_properties (OffscreenGecko PROPERTIES
-    LINK_FLAGS "/DELAYLOAD:xul.dll /DELAYLOAD:nspr4.dll")
+    LINK_FLAGS "/DELAYLOAD:xul.dll /DELAYLOAD:nspr4.dll /DELAYLOAD:js3250.dll")
 ENDIF(CMAKE_GENERATOR MATCHES "Visual Studio")
 

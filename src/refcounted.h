@@ -34,36 +34,36 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-#ifndef __COMPONENTMGR_H__
-#define __COMPONENTMGR_H__
+#ifndef __REFCOUNTED_H__
+#define __REFCOUNTED_H__
 
-#include "baseobj_private.h"
-
-#include GECKO_INCLUDE(xpcom,nscore.h)
-#include GECKO_INCLUDE(xpcom,nsCOMPtr.h)
-#include GECKO_INCLUDE(xpcom,nsIFactory.h)
-
-#include "OffscreenGecko/componentmgr.h"
+/**\file
+ * Reference counted class
+ */
 
 namespace OSGK
 {
   namespace Impl
   {
-    class ComponentMgr : public BaseObject<OSGK_ComponentMgr>
+    class RefCounted
     {
-      nsresult initResult;
-
-      nsCOMPtr<nsIComponentManager> nsCompMgr;
-      nsCOMPtr<nsIComponentRegistrar> nsCompReg;
+      int refCount;
     public:
-      ComponentMgr ();
-
-      nsresult RegisterXPCOMFactory (const nsCID& aClass, 
-        const char* className, const char* contractID, nsIFactory* factory);
-      nsresult UnregisterXPCOMFactory (const nsCID& aClass, 
-        nsIFactory* factory);
+      RefCounted() : refCount(1) { }
+      virtual ~RefCounted() {}
+	
+      int AddRef()
+      { 
+	return ++refCount;
+      }
+      int Release()
+      { 
+	int rc = --refCount;
+	if (rc == 0) delete this;
+	return rc;
+      }
     };
   } // namespace Impl
 } // namespace OSGK
 
-#endif // __COMPONENTMGR_H__
+#endif // __REFCOUNTED_H__
