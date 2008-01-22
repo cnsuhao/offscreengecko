@@ -219,6 +219,20 @@ namespace OSGK
       void SetObject (T* obj) { this->obj = obj; }
       /// Directly get the wrapped object.
       T* GetObject() const { return obj; }
+      /**
+       * Return the wrapped object and clear it.
+       * Equivalent to
+       * \code
+       * x = obj.GetObject(); obj.SetObject (0);
+       * \endcode
+       * \warning Does not decrease the reference count of the object!
+       */
+      T* Detach()
+      {
+        T* ret = obj;
+        obj = 0;
+        return ret;
+      }
     };
   } // namespace CXXAPI
 } // namespace OSGK

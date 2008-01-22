@@ -1,5 +1,11 @@
 2007-01-22	Frank Richter	<frank.richter@gmail.com>
 
+* Add scripting support: it's possible to create "templates" for scripting
+  objects which can be associated to globals in scripting (ie when a script
+  requests a global, an actual object is instantiated from the template).
+
+2007-01-22	Frank Richter	<frank.richter@gmail.com>
+
 * Add ability to create OSGK_Strings from client code.
 
 2007-12-24	Frank Richter	<frank.richter@gmail.com>

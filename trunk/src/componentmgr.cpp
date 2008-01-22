@@ -61,6 +61,14 @@ namespace OSGK
 
       return nsCompReg->RegisterFactory (aClass, className, contractID, factory);
     }
+
+    nsresult ComponentMgr::UnregisterXPCOMFactory (const nsCID& aClass, 
+        nsIFactory* factory)
+    {
+      if (NS_FAILED (initResult)) return initResult;
+
+      return nsCompReg->UnregisterFactory (aClass, factory);
+    }
   } // namespace Impl
 } // namespace OSGK
 
