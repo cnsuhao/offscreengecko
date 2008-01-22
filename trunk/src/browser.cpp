@@ -179,6 +179,20 @@ void osgk_browser_resize (OSGK_Browser* browser, int width, int height)
   static_cast<OSGK::Impl::Browser*> (browser)->Resize (width, height);
 }
 
+int osgk_browser_set_user_data (OSGK_Browser* browser, unsigned int key, void* data, 
+                                int overrideData)
+{
+  return static_cast<OSGK::Impl::Browser*> (browser)->SetUserData (key, data,
+    overrideData != 0);
+}
+
+int osgk_browser_get_user_data (OSGK_Browser* browser, unsigned int key, void** data)
+{
+  if (data == 0) return 0;
+  return static_cast<OSGK::Impl::Browser*> (browser)->GetUserData (key, *data);
+}
+
+
 namespace OSGK
 {
   namespace Impl
@@ -206,7 +220,7 @@ namespace OSGK
     Browser::Browser (OSGK_GeckoResult& result, Embedding* embedding, 
                       int width, int height) :
       embedding (embedding), updateState (updClean), mouseX (-1),
-      mouseY (-1), focusedWidget (0)
+      mouseY (-1), focusedWidget (0), userData (0)
     {
       nsresult rv;
       webBrowser = do_CreateInstance (NS_WEBBROWSER_CONTRACTID, &rv);
@@ -276,6 +290,7 @@ namespace OSGK
     Browser::~Browser ()
     {
       GetEmbedding()->Unfocus (this);
+      delete userData;
     }
 
     void Browser::ProcessToolkitEvents()
@@ -474,6 +489,25 @@ namespace OSGK
 
       widget->ResizeFromTheSourceOfPower (width, height);
       baseWindow->SetSize (width, height, true);
+    }
+
+    bool Browser::SetUserData (unsigned int key, void* data, bool overrideData)
+    {
+      UserDataHash& userData = this->GetUserDataHash();
+
+      if (!overrideData && (userData.count (key) > 0)) return false;
+      userData[key] = data;
+      return true;
+    }
+
+    bool Browser::GetUserData (unsigned int key, void*& data)
+    {
+      if (!userData) return false;
+
+      UserDataHash& userData = this->GetUserDataHash();
+      if (userData.count (key) == 0) return false;
+      data = userData[key];
+      return true;
     }
 
     //-----------------------------------------------------------------------

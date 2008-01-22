@@ -1,5 +1,9 @@
 2007-01-22	Frank Richter	<frank.richter@gmail.com>
 
+* Added ability to attach user data to browser objects.
+
+2007-01-22	Frank Richter	<frank.richter@gmail.com>
+
 * Fix a clean up issue: destroying a script object factory could have accessed
   an already freed component manager.
 
