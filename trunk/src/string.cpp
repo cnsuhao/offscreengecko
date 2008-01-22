@@ -45,3 +45,8 @@ const char* osgk_string_get (OSGK_String* str)
 {
   return static_cast<OSGK::Impl::BaseString*> (str)->Get();
 }
+
+OSGK_String* osgk_string_create (const char* str)
+{
+  return new OSGK::Impl::Str_WrapStdStr (str);
+}
