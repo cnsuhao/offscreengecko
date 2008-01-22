@@ -51,10 +51,10 @@ typedef enum OSGK_ScriptResult
   srFailed = 0x80004005L /* actually NS_ERROR_FAILURE */
 } OSGK_ScriptResult;
 
-struct OSGK_ScriptObjectCreateParams
+typedef struct OSGK_ScriptObjectCreateParams_s
 {
   void* createParam;
-};
+} OSGK_ScriptObjectCreateParams;
 
 typedef OSGK_ScriptResult (*OSGK_CreateObjFunc) (
   OSGK_ScriptObjectCreateParams* params, void** objTag);
