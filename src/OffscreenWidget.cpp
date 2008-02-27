@@ -116,6 +116,11 @@ namespace OSGK
       dirtyRegion->Init ();
     }
 
+    OffscreenWidget::~OffscreenWidget()
+    {
+      if (browser) browser->SetWidget (0);
+    }
+
     NS_IMETHODIMP OffscreenWidget::Create(nsIWidget        *aParent,
                                           const nsRect     &aRect,
                                           EVENT_CALLBACK   aHandleEventFunction,

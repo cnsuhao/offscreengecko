@@ -357,11 +357,13 @@ namespace OSGK
 
     void Browser::UpdateBrowser()
     {
+      if (!widget) return;
       widget->Update();
     }
 
     void Browser::EventMouseMove (int x, int y)
     {
+      if (!widget) return;
       embedding->UpdateAutoFocus (this);
       mouseX = x; mouseY = y;
       if (MouseInside())
@@ -373,6 +375,7 @@ namespace OSGK
     void Browser::EventMouseButton (OSGK_MouseButton button, 
       OSGK_MouseButtonEventType eventType)
     {
+      if (!widget) return;
       embedding->UpdateAutoFocus (this);
       if (MouseInside())
       {
@@ -384,6 +387,7 @@ namespace OSGK
     void Browser::EventMouseWheel (OSGK_WheelAxis axis, 
                                    OSGK_WheelDirection direction)
     {
+      if (!widget) return;
       embedding->UpdateAutoFocus (this);
       int flags = 0, delta = 0;
       switch (axis)
@@ -412,6 +416,7 @@ namespace OSGK
 
     bool Browser::EventKey (unsigned int key, OSGK_KeyboardEventType eventType)
     {
+      if (!widget) return false;
       embedding->UpdateAutoFocus (this);
       if (focusedWidget == 0) return false;
 
@@ -472,6 +477,7 @@ namespace OSGK
 
     void Browser::DoFocus (bool haveFocus, bool focusExternal)
     {
+      if (!widget) return;
       if (focusedWidget != 0)
         focusedWidget->ChangeFocus (haveFocus, focusExternal);
       else
@@ -483,6 +489,7 @@ namespace OSGK
 
     void Browser::Resize (int width, int height)
     {
+      if (!widget) return;
       gfxIntSize size (width, height);
       surface = new gfxImageSurface (size,
         gfxASurface::ImageFormatARGB32);

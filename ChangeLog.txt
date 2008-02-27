@@ -1,5 +1,9 @@
 2008-02-27	Frank Richter	<frank.richter@gmail.com>
 
+* Work around crash when injecting events.
+
+2008-02-27	Frank Richter	<frank.richter@gmail.com>
+
 * Update to latest XULrunner.
 
 2008-02-27	Frank Richter	<frank.richter@gmail.com>

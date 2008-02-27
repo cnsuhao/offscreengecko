@@ -118,6 +118,7 @@ namespace OSGK
       bool DispatchFocus(PRUint32 aEventType, bool isMozWindowTakingFocus);
     public:
       OffscreenWidget();
+      ~OffscreenWidget();
     
       Embedding* GetEmbedding()
       {
