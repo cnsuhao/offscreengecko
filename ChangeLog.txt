@@ -1,3 +1,7 @@
+2008-02-27	Frank Richter	<frank.richter@gmail.com>
+
+* Fixed building for latest XULrunner.
+
 2008-01-22	Frank Richter	<frank.richter@gmail.com>
 
 * Fixed wrong refcounting when creating variant from string.

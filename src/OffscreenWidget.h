@@ -276,6 +276,12 @@ namespace OSGK
       { return NS_ERROR_NOT_IMPLEMENTED; }
      
       virtual nsIWidget* GetWidget() { return this; }
+      
+      NS_IMETHOD SetHasTransparentBackground(PRBool)
+      { return NS_ERROR_NOT_IMPLEMENTED; }
+
+      NS_IMETHOD GetHasTransparentBackground(PRBool&)
+      { return NS_ERROR_NOT_IMPLEMENTED; }
 
       void EventMouseMove (const EventHelpers::KeyState& kstate, int x, int y);
       void EventMouseButton (const EventHelpers::KeyState& kstate, 
