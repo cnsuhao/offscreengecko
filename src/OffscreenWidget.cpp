@@ -344,7 +344,7 @@ namespace OSGK
       {
         nsPaintEvent event(PR_TRUE, NS_PAINT, this);
 
-        NS_ADDREF(event.widget);
+	nsCOMPtr<nsIWidget> refKeeper (event.widget);
 
         /* Apparently, the scroll bars for the browser are not drawn correctly
            when a region to draw is specified, but they work if only a rectangle
@@ -384,8 +384,6 @@ namespace OSGK
         DispatchEvent (&event, eventStatus);
         result = eventStatus == nsEventStatus_eConsumeNoDefault;
         event.renderingContext = nsnull;
-
-        NS_RELEASE(event.widget);
       }
 
 #ifdef REPAINT_DUMP
