@@ -63,6 +63,7 @@
   #endif
 #elif !defined(XP_WIN)
 # define snwprintf swprintf
+# define _snprintf snprintf
 #endif
 
 #endif // __DEFS_PRIVATE_H__

@@ -50,6 +50,11 @@ namespace OSGK
     class ScriptVariant : public BaseObject<OSGK_ScriptVariant>
     {
       OSGK_ScriptVariantType dataType;
+      struct ArrayStruct
+      {
+	size_t itemNum;
+	OSGK_ScriptVariant** items;
+      };
       union
       {
         int intVal;
@@ -61,11 +66,7 @@ namespace OSGK
         OSGK_String* stringVal;
         nsISupports* isupportsVal;
         void* scriptObjectVal;
-        struct ArrayStruct
-        {
-          size_t itemNum;
-          OSGK_ScriptVariant** items;
-        } arrayVal;
+        ArrayStruct arrayVal;
       };
     public:
       ScriptVariant () : dataType (svtEmpty) {}
