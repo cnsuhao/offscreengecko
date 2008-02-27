@@ -11,10 +11,10 @@ PACKAGE="OffscreenGecko-source-${VERSION}"
 TARNAME="${PACKAGE}.zip"
 TOP="`pwd`"
 
-${TOP}/bin/ignorantcopy.sh . ${WORKDIR}/${PACKAGE}/
+"${TOP}/bin/ignorantcopy.sh" . ${WORKDIR}/${PACKAGE}/
 
 cd ${WORKDIR}
-rm -f ${TOP}/out/${TARNAME}
-zip -9 -r ${TOP}/out/${TARNAME} ${PACKAGE}
+rm -f "${TOP}/out/${TARNAME}"
+zip -9 -r "${TOP}/out/${TARNAME}" ${PACKAGE}
 
-cd ${TOP}
+cd "${TOP}"
