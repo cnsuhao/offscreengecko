@@ -283,6 +283,12 @@ namespace OSGK
 
       NS_IMETHOD GetHasTransparentBackground(PRBool&)
       { return NS_ERROR_NOT_IMPLEMENTED; }
+      
+      virtual nsIWidget* GetSheetWindowParent() { return 0; }
+      NS_IMETHOD SetWindowTitlebarColor(nscolor, PRBool)
+      { return NS_ERROR_NOT_IMPLEMENTED; }
+      NS_IMETHOD SynthesizeNativeKeyEvent(PRInt32, PRInt32, PRUint32, const nsAString&, const nsAString&)
+      { return NS_ERROR_NOT_IMPLEMENTED; }
 
       void EventMouseMove (const EventHelpers::KeyState& kstate, int x, int y);
       void EventMouseButton (const EventHelpers::KeyState& kstate, 
