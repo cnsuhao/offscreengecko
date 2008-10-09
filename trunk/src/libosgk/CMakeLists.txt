@@ -1,4 +1,3 @@
-INCLUDE(CheckCXXSourceCompiles)
 INCLUDE(FindPkgConfig)
 
 include_directories(${OffscreenGecko_SOURCE_DIR}/include)
@@ -116,7 +115,7 @@ ENDIF(CMAKE_COMPILER_IS_GNUCXX)
 link_directories(${XULRUNNER_LIBRARY_DIRS})
 IF(NOT CMAKE_GENERATOR MATCHES "Visual Studio")
   message("Creating relaytool files...")
-  EXEC_PROGRAM(${OffscreenGecko_SOURCE_DIR}/bin/relaytool out
+  EXEC_PROGRAM(${OffscreenGecko_SOURCE_DIR}/bin/relaytool out/libosgk
     ARGS --relay xul --relay nspr4 ${XULRUNNER_LDFLAGS}
     OUTPUT_VARIABLE XULRUNNER_LFLAGS)
   # -lxpcomglue added manually to work around xpcomglue_s appearing in LFLAGS on gentoo
@@ -129,6 +128,7 @@ add_definitions(-DXPCOM_GLUE=1)
 
 file(GLOB sources *.cpp *.h)
 add_library(OffscreenGecko SHARED ${sources})
+add_dependencies(OffscreenGecko osgk-common)
 IF(NOT CMAKE_GENERATOR MATCHES "Visual Studio")
   install(TARGETS OffscreenGecko
 	  ARCHIVE DESTINATION lib
