@@ -75,13 +75,13 @@ OSGK_ScriptVariant* osgk_variant_convert (OSGK_ScriptVariant* variant,
         {
           float f;
           if (!osgk_variant_get_float (variant, &f)) return 0;
-          return osgk_variant_create_int (embedding, f);
+          return osgk_variant_create_int (embedding, (int)f);
         }
       case svtDouble:
         {
           double d;
           if (!osgk_variant_get_double (variant, &d)) return 0;
-          return osgk_variant_create_int (embedding, d);
+          return osgk_variant_create_int (embedding, (int)d);
         }
       case svtBool:
         {
@@ -121,13 +121,13 @@ OSGK_ScriptVariant* osgk_variant_convert (OSGK_ScriptVariant* variant,
         {
           float f;
           if (!osgk_variant_get_float (variant, &f)) return 0;
-          return osgk_variant_create_uint (embedding, f);
+          return osgk_variant_create_uint (embedding, (uint)f);
         }
       case svtDouble:
         {
           double d;
           if (!osgk_variant_get_double (variant, &d)) return 0;
-          return osgk_variant_create_uint (embedding, d);
+          return osgk_variant_create_uint (embedding, (uint)d);
         }
       case svtBool:
         {
@@ -265,13 +265,13 @@ OSGK_ScriptVariant* osgk_variant_convert (OSGK_ScriptVariant* variant,
         {
           float f;
           if (!osgk_variant_get_float (variant, &f)) return 0;
-          return osgk_variant_create_bool (embedding, f);
+          return osgk_variant_create_bool (embedding, (bool)f);
         }
       case svtDouble:
         {
           double d;
           if (!osgk_variant_get_double (variant, &d)) return 0;
-          return osgk_variant_create_bool (embedding, d);
+          return osgk_variant_create_bool (embedding, (bool)d);
         }
       case svtChar:
         {
@@ -312,13 +312,13 @@ OSGK_ScriptVariant* osgk_variant_convert (OSGK_ScriptVariant* variant,
         {
           float f;
           if (!osgk_variant_get_float (variant, &f)) return 0;
-          return osgk_variant_create_char (embedding, f);
+          return osgk_variant_create_char (embedding, (char)f);
         }
       case svtDouble:
         {
           double d;
           if (!osgk_variant_get_double (variant, &d)) return 0;
-          return osgk_variant_create_char (embedding, d);
+          return osgk_variant_create_char (embedding, (char)d);
         }
       case svtBool:
         {
