@@ -377,6 +377,27 @@ OSGK_EXTERN_C OSGK_API float osgk_browser_query_load_progress (
 
 /** @} */
 
+/**
+ * Get the preferred dimensions of the displayed content.
+ * The preferred dimensions are the dimensions at which no scrollbars have
+ * to be displayed and no lines have to be wrapped.
+ * \param browser The browser object.
+ * \param preferredWidth Returns the preferred width.
+ * \param preferredHeight Returns the preferred height.
+ * \param maxWidth Sets the maximum returned width. If -1 the width is
+ *   unbounded.
+ * \return Whether obtaining the preferred width was successful. If not, the
+ *   values referenced by \a preferredWidth and \a preferredHeight are
+ *   unchanged.
+ * \remarks The returned preferred width may be larger than \a maxWidth if
+ *   scrollbars would be displayed. Thus, if providing a maximum width of 0,
+ *   the returned preferred width is the minimal width at which no scrollbars
+ *   are displayed.
+ */
+OSGK_EXTERN_C OSGK_API int osgk_browser_get_preferred_dimensions (
+  OSGK_Browser* browser, int* preferredWidth, int* preferredHeight,
+  int maxWidth OSGK_DEFAULT_ARG(-1));
+
 #ifdef __cplusplus
 namespace OSGK
 {
@@ -614,9 +635,31 @@ namespace OSGK
     {
       return osgk_browser_query_load_progress (GetObject());
     }
-
     /** @} */
-    };
+    
+    /**
+     * Get the preferred dimensions of the displayed content.
+     * The preferred dimensions are the dimensions at which no scrollbars have
+     * to be displayed and no lines have to be wrapped.
+     * \param preferredWidth Returns the preferred width.
+     * \param preferredHeight Returns the preferred height.
+     * \param maxWidth Sets the maximum returned width. If -1 the width is
+     *   unbounded.
+     * \return Whether obtaining the preferred width was successful. If not, the
+     *   values referenced by \a preferredWidth and \a preferredHeight are
+     *   unchanged.
+     * \remarks The returned preferred width may be larger than \a maxWidth if
+     *   scrollbars would be displayed. Thus, if providing a maximum width of 0,
+     *   the returned preferred width is the minimal width at which no scrollbars
+     *   are displayed.
+     */
+    bool GetPreferredDimensions (int& preferredWidth, int& preferredHeight,
+      int maxWidth = -1)
+    {
+      return osgk_browser_get_preferred_dimensions (GetObject(),
+	&preferredWidth, &preferredHeight, maxWidth) != 0;
+    }
+  };
   
 } // namespace OSGK
 #endif
