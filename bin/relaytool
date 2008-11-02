@@ -122,9 +122,11 @@ function relay() {
     if $using_partial_map; then
         functions=$( grep "^F " "$partial_map" | cut -d' ' -f2 )
         variables=$( grep "^V " "$partial_map" | cut -d' ' -f2 )
+        variables_weak=
     else
         functions=$( nm --extern-only -D "$lib" | awk '{ if (($2 == "T") || ($2 == "W")) print $3; }' | LC_ALL=C grep -v '\(\<_init\>\|\<_fini\>\)' | LC_ALL=C sort -u )
-        variables=$( nm --extern-only -D "$lib" | awk '{ if (($2 == "D") || ($2 == "G") || ($2 == "B") || ($2 == "V")) print $3; }' | LC_ALL=C sort -u )
+        variables=$( nm --extern-only -D "$lib" | awk '{ if (($2 == "D") || ($2 == "G") || ($2 == "B")) print $3; }' | LC_ALL=C sort -u )
+	variables_weak=$( nm --extern-only -D "$lib" | awk '{ if (($2 == "V")) print $3; }' | LC_ALL=C sort -u )
     fi
     if $using_minimal_list; then
         functions="$functions
@@ -133,9 +135,12 @@ $( nm `echo "$object_list"` | awk '{ if ($1 == "U") print $2; }' | LC_ALL=C sort
         variables="$variables
 $( nm `echo "$object_list"` | awk '{ if ($1 == "U") print $2; }' | LC_ALL=C sort -u )"
         variables=$( echo "$variables" | LC_ALL=C sort | LC_ALL=C uniq -d )
+        variables_weak="$variables_weak
+$( nm `echo "$object_list"` | awk '{ if ($1 == "U") print $2; }' | LC_ALL=C sort -u )"
+        variables_weak=$( echo "$variables_weak" | LC_ALL=C sort | LC_ALL=C uniq -d )
     fi
 
-    if [ "$functions" == "" ] && [ "$variables" == "" ]; then
+    if [ "$functions" == "" ] && [ "$variables" == "" ] && [ "$variables_weak" == "" ]; then
         # Nothing will be used, so do nothing for that lib
         exit 1
     fi
@@ -175,6 +180,9 @@ static char *variables[] = {
 EOF
 
     for s in $variables; do
+        echo "    \"$s\"," >>"$outfile"
+    done
+    for s in $variables_weak; do
         echo "    \"$s\"," >>"$outfile"
     done
     echo "    0" >>"$outfile"
@@ -294,8 +302,12 @@ cat <<EOF >>"$outfile"
     void* symptr;
 EOF
 
-    if [ "$variables" != "" ]; then echo "    /* now fixup the global offset table for variable imports */" >>"$outfile"; fi
+    if [ "$variables" != "" ] || [ "$variables_weak" != "" ]; then echo "    /* now fixup the global offset table for variable imports */" >>"$outfile"; fi
     for s in $variables; do
+        echo "    symptr = dlsym(handle, \"$s\");" >>"$outfile"
+        echo "    FIXUP_GOT_RELOC( $s, symptr );" >>"$outfile"
+    done
+    for s in $variables_weak; do
         echo "    symptr = dlsym(handle, \"$s\");" >>"$outfile"
         echo "    FIXUP_GOT_RELOC( $s, symptr );" >>"$outfile"
     done
@@ -365,6 +377,9 @@ EOF
 
     for s in $variables; do
         echo "int $s __attribute__(( visibility(\"hidden\") )) = -1;" >>"$outfile"
+    done
+    for s in $variables_weak; do
+        echo "int $s __attribute__((weak)) __attribute__(( visibility(\"hidden\") )) = -1;" >>"$outfile"
     done
 
     cat <<EOF >>"$outfile"
