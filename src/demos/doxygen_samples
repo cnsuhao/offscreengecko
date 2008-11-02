@@ -1,0 +1,30 @@
+/**\file
+ * This is just a dummy container for the doxygen markup for the examples.
+ * The list of examples can be found in the <a href="pages.html">Related Pages section</a>.
+ */
+
+/** \page example_delayedcreation Example: Delayed creation of an OffscreenGecko object in C++
+ * In C++, an instance of the wrapped object type is created immediately when 
+ * the wrapper class is constructed. Delayed creation is still possible, 
+ * though: for that, the wrapper must be initialized with a <i>null reference</i>. 
+ * Later, a new instance of the wrapper type for the desired object can be assigned. 
+ * \code
+ * // Initializes as a "null reference"
+ * OSGK::Browser myBrowser (OSGK::Browser::Null());
+ *
+ * // ... do other stuff ...
+ *
+ * // Now actually create an object
+ * myBrowser = OSGK::Browser (...);
+ * \endcode
+ */
+
+/**
+ * \page example_web2image Example: Render web page to image file
+ * This is a simple application that renders a web page to a memory buffer
+ * and writes that to disk.
+ *
+ * (OSGK::TGAWriter is an OffscreenGecko-internal class; but the image 
+ * writing is not the point of the example anyway.)
+ * \include webpage2image.cpp
+ */

@@ -273,7 +273,7 @@ typedef enum OSGK_AntiAliasType
   /**
    * Allow subpixel antialiasing (aka ClearType). This should only be used
    * when it's known that a surface pixel will exactly match an LCD pixel. If
-   * that's not the case output will jave color fringes.
+   * that's not the case output will have color fringes.
    */
   aaSubpixel
 } OSGK_AntiAliasType;
