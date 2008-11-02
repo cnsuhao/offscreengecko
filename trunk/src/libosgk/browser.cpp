@@ -192,6 +192,16 @@ int osgk_browser_get_user_data (OSGK_Browser* browser, unsigned int key, void** 
   return static_cast<OSGK::Impl::Browser*> (browser)->GetUserData (key, *data);
 }
 
+OSGK_LoadState osgk_browser_query_load_state (OSGK_Browser* browser)
+{
+  return static_cast<OSGK::Impl::Browser*> (browser)->QueryLoadState ();
+}
+
+float osgk_browser_query_load_progress (OSGK_Browser* browser)
+{
+  return static_cast<OSGK::Impl::Browser*> (browser)->QueryLoadProgress ();
+}
+
 
 namespace OSGK
 {
@@ -205,6 +215,9 @@ namespace OSGK
     {
       nsIWebBrowser* webBrowser;
       PRUint32     chromeFlags;
+      
+      OSGK_LoadState loadState;
+      float loadProgress;
     public:
       Container ();
       virtual ~Container ();
@@ -215,6 +228,8 @@ namespace OSGK
       NS_DECL_NSIEMBEDDINGSITEWINDOW
       NS_DECL_NSIINTERFACEREQUESTOR
 
+      OSGK_LoadState QueryLoadState () { return loadState; }
+      float QueryLoadProgress () { return loadProgress; }
     };
 
     Browser::Browser (OSGK_GeckoResult& result, Embedding* embedding, 
@@ -517,6 +532,20 @@ namespace OSGK
       return true;
     }
 
+    OSGK_LoadState Browser::QueryLoadState ()
+    {
+      if (!container) return loadFinished;
+      ProcessToolkitEvents ();
+      return container->QueryLoadState();
+    }
+    
+    float Browser::QueryLoadProgress ()
+    {
+      if (!container) return 1.0f;
+      ProcessToolkitEvents ();
+      return container->QueryLoadProgress();
+    }
+    
     //-----------------------------------------------------------------------
 
     NS_IMPL_ADDREF(Container)
@@ -531,7 +560,7 @@ namespace OSGK
        NS_INTERFACE_MAP_ENTRY(nsIInterfaceRequestor)
     NS_INTERFACE_MAP_END
 
-    Container::Container ()
+    Container::Container () : loadState (loadFinished), loadProgress (1.0f)
     {
     }
 
@@ -699,24 +728,29 @@ namespace OSGK
                                                       PRInt32 curTotalProgress, PRInt32 maxTotalProgress)
     {
       //WebBrowserChromeUI::UpdateProgress(this, curTotalProgress, maxTotalProgress);
+      loadProgress = (float)curTotalProgress/(float)maxTotalProgress;
       return NS_OK;
     }
 
     NS_IMETHODIMP Container::OnStateChange(nsIWebProgress *progress, nsIRequest *request,
                                                    PRUint32 progressStateFlags, nsresult status)
     {
-      /*if ((progressStateFlags & STATE_START) && (progressStateFlags & STATE_IS_DOCUMENT))
+      if ((progressStateFlags & STATE_START) && (progressStateFlags & STATE_IS_DOCUMENT))
       {
-        WebBrowserChromeUI::UpdateBusyState(this, PR_TRUE);
+        //WebBrowserChromeUI::UpdateBusyState(this, PR_TRUE);
+	if (loadState != loadLoading) loadProgress = 0.0f;
+	loadState = loadLoading;
       }
 
       if ((progressStateFlags & STATE_STOP) && (progressStateFlags & STATE_IS_DOCUMENT))
       {
-        WebBrowserChromeUI::UpdateBusyState(this, PR_FALSE);
+        /*WebBrowserChromeUI::UpdateBusyState(this, PR_FALSE);
         WebBrowserChromeUI::UpdateProgress(this, 0, 100);
         WebBrowserChromeUI::UpdateStatusBarText(this, nsnull);
-        ContentFinishedLoading();
-      }*/
+        ContentFinishedLoading();*/
+	loadState = loadFinished;
+	loadProgress = 1.0f;
+      }
 
       return NS_OK;
     }
