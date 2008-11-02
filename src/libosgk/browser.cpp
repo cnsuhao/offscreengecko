@@ -78,8 +78,21 @@
 #include "embedding.h"
 #include "OffscreenWidget.h"
 
+// HACKs to allow inclusion of nsPresContext.h
+#define nsAString_h___
+class nsAFlatCString;
+// HACKs to allow inclusion of nsIFrame.h
+#define nsString_h___
+
+#include GECKO_INCLUDE(content,nsIDocument.h)
+#include GECKO_INCLUDE(docshell,nsIDocShellTreeItem.h)
+#include GECKO_INCLUDE(dom,nsIDOMDocument.h)
 #include GECKO_INCLUDE(dom,nsIDOMWindow.h)
 #include GECKO_INCLUDE(embed_base,nsEmbedCID.h)
+#include GECKO_INCLUDE(generic,nsHTMLReflowState.h)
+#include GECKO_INCLUDE(layout,nsIDocumentViewer.h)
+#include GECKO_INCLUDE(layout,nsIFrame.h)
+#include GECKO_INCLUDE(layout,nsPresContext.h)
 #include GECKO_INCLUDE(webbrwsr,nsIWebBrowserSetup.h)
 #include GECKO_INCLUDE(widget,nsIWidget.h)
 #include GECKO_INCLUDE(xpcom,nsComponentManagerUtils.h)
@@ -200,6 +213,14 @@ OSGK_LoadState osgk_browser_query_load_state (OSGK_Browser* browser)
 float osgk_browser_query_load_progress (OSGK_Browser* browser)
 {
   return static_cast<OSGK::Impl::Browser*> (browser)->QueryLoadProgress ();
+}
+
+int osgk_browser_get_preferred_dimensions (OSGK_Browser* browser,
+  int* preferredWidth, int* preferredHeight,
+  int maxWidth)
+{
+  return static_cast<OSGK::Impl::Browser*> (browser)->GetPreferredDimensions (
+    *preferredWidth, *preferredHeight, maxWidth);
 }
 
 
@@ -544,6 +565,89 @@ namespace OSGK
       if (!container) return 1.0f;
       ProcessToolkitEvents ();
       return container->QueryLoadProgress();
+    }
+    
+    bool Browser::GetPreferredDimensions (int& preferredWidth, 
+					  int& preferredHeight,
+					  int maxWidth)
+    {
+      nsCOMPtr<nsIDOMWindow> domWindow;
+      webBrowser->GetContentDOMWindow (getter_AddRefs(domWindow));
+      if (!domWindow) return false;
+      
+      // Mostly lifted from Gecko DocumentViewerImpl::SizeToContent()
+      nsCOMPtr<nsIDOMDocument> domDoc;
+      domWindow->GetDocument (getter_AddRefs(domDoc));
+      NS_ENSURE_TRUE(domDoc, false);
+      
+      nsCOMPtr<nsIDocument> doc (do_QueryInterface(domDoc));
+      NS_ENSURE_TRUE(doc, false);
+      
+      nsIPresShell* presShell = doc->GetPrimaryShell();
+      NS_ENSURE_TRUE(presShell, false);
+      
+      nsPresContext* presContext = presShell->GetPresContext ();
+      NS_ENSURE_TRUE(presContext, false);
+      
+      nsCOMPtr<nsISupports> container (presContext->GetContainer());
+
+      nsCOMPtr<nsIDocShellTreeItem> docShellAsItem(do_QueryInterface(container));
+      NS_ENSURE_TRUE(docShellAsItem, false);
+
+      nsCOMPtr<nsIDocShellTreeItem> docShellParent;
+      docShellAsItem->GetSameTypeParent(getter_AddRefs(docShellParent));
+
+      // It's only valid to access this from a top frame.  Doesn't work from
+      // sub-frames.
+      NS_ENSURE_TRUE(!docShellParent, false);
+
+      // Flush out all content and style updates. We can't use a resize reflow
+      // because it won't change some sizes that a style change reflow will.
+      doc->FlushPendingNotifications(Flush_Layout);
+  
+      nsIFrame *root = presShell->GetRootFrame();
+      NS_ENSURE_TRUE(root, false);
+  
+      maxWidth = presContext->DevPixelsToAppUnits (maxWidth-1);
+      nscoord prefWidth;
+      {
+	nsCOMPtr<nsIRenderingContext> rcx;
+	presShell->CreateRenderingContext(root, getter_AddRefs(rcx));
+	NS_ENSURE_TRUE(rcx, NS_ERROR_FAILURE);
+	nscoord minWidth = root->GetMinWidth(rcx);
+	prefWidth = root->GetPrefWidth(rcx);
+	if ((maxWidth >= 0) && (prefWidth > maxWidth))
+	  prefWidth = maxWidth;
+	if (prefWidth < minWidth) prefWidth = minWidth;
+      }
+
+      nsresult rv = presShell->ResizeReflow(prefWidth, NS_UNCONSTRAINEDSIZE);
+      NS_ENSURE_SUCCESS(rv, false);
+    
+      PRInt32 width, height;
+  
+      // so how big is it?
+      nsRect shellArea = presContext->GetVisibleArea();
+      // Protect against bogus returns here
+      NS_ENSURE_TRUE(shellArea.width != NS_UNCONSTRAINEDSIZE &&
+		     shellArea.height != NS_UNCONSTRAINEDSIZE,
+		     false);
+      width = presContext->AppUnitsToDevPixels(shellArea.width);
+      height = presContext->AppUnitsToDevPixels(shellArea.height);
+  
+      /* presContext's size was calculated in app units and has already been
+	 rounded to the equivalent pixels (so the width/height calculation
+	 we just performed was probably exact, though it was based on
+	 values already rounded during ResizeReflow). In a surprising
+	 number of instances, this rounding makes a window which for want
+	 of one extra pixel's width ends up wrapping the longest line of
+         text during actual window layout. This makes the window too short,
+	 generally clipping the OK/Cancel buttons. Here we add one pixel
+	 to the calculated width, to circumvent this problem. */
+      preferredWidth = width + 1;
+      preferredHeight = height;
+      
+      return true;
     }
     
     //-----------------------------------------------------------------------
