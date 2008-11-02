@@ -18,6 +18,14 @@ ELSE(CMAKE_GENERATOR MATCHES "Visual Studio")
     pkg_search_module(XULRUNNER libxul-unstable>=1.9 libxul>=1.9 xulrunner-xpcom>=1.9)
     IF(XULRUNNER_FOUND)
       MESSAGE("xulrunner: ${XULRUNNER_INCLUDE_DIRS}")
+      set(XULRUNNER_NEW_LIBRARY_DIRS)
+      foreach(XULRUNNER_LIB_DIR ${XULRUNNER_LIBRARY_DIRS})
+	# @@@ Gentoo: libdir points at sdk/lib/ subdirectory which only contains a subset of xulrunner libs
+	set(XULRUNNER_NEW_LIBRARY_DIRS ${XULRUNNER_NEW_LIBRARY_DIRS} ${XULRUNNER_LIB_DIR}/../..)
+	set(XULRUNNER_LDFLAGS ${XULRUNNER_LDFLAGS} -L${XULRUNNER_LIB_DIR}/../..)
+	set(XULRUNNER_LDFLAGS ${XULRUNNER_LDFLAGS} -Wl,-rpath,${XULRUNNER_LIB_DIR}/../..)
+      endforeach(XULRUNNER_LIB_DIR)
+      set(XULRUNNER_LIBRARY_DIRS XULRUNNER_NEW_LIBRARY_DIRS)
     ELSE(XULRUNNER_FOUND)
       MESSAGE("xulrunner not detected; defaulting to  src/${XULRUNNER_SDK_DIR_DEFAULT}")
       set(XULRUNNER_SDK_DIR "${XULRUNNER_SDK_DIR_DEFAULT}")
@@ -28,7 +36,7 @@ ENDIF(CMAKE_GENERATOR MATCHES "Visual Studio")
 IF(XULRUNNER_SDK_DIR)
   set(XULRUNNER_INCLUDE_DIRS "${XULRUNNER_SDK_DIR}/include")
   set(XULRUNNER_LIBRARY_DIRS "${XULRUNNER_SDK_DIR}/lib")
-  set(XULRUNNER_LFLAGS "-lxul -lnspr4")
+  set(XULRUNNER_LDFLAGS -lxul -lnspr4)
 ENDIF(XULRUNNER_SDK_DIR)
 
 set(CMAKE_REQUIRED_INCLUDES "${XULRUNNER_INCLUDE_DIRS}")
@@ -43,6 +51,8 @@ IF(XULRUNNER_FLAT_INCDIR)
   add_definitions(-DOSGK_GECKOINC_FLAT)
   set(CMAKE_REQUIRED_DEFINITIONS "${CMAKE_REQUIRED_DEFINITIONS} -DOSGK_GECKOINC_FLAT")
 ENDIF(XULRUNNER_FLAT_INCDIR)
+
+set(CMAKE_REQUIRED_DEFINITIONS "${CMAKE_REQUIRED_DEFINITIONS} -DOSGK_BUILD")
 
 IF(NOT CMAKE_GENERATOR MATCHES "Visual Studio")
   CHECK_CXX_SOURCE_COMPILES(
@@ -59,16 +69,18 @@ IF(NOT CMAKE_GENERATOR MATCHES "Visual Studio")
   ENDIF(NOT XULRUNNER_BUILDS_WITHOUT_SHORT_WCHAR)
 ENDIF(NOT CMAKE_GENERATOR MATCHES "Visual Studio")
 
-set(CMAKE_REQUIRED_INCLUDES "${OffscreenGecko_SOURCE_DIR}/src/" "${OffscreenGecko_SOURCE_DIR}/include/" "${CMAKE_REQUIRED_INCLUDES}")
+set(CMAKE_REQUIRED_INCLUDES "${OffscreenGecko_SOURCE_DIR}/src/libosgk/" "${OffscreenGecko_SOURCE_DIR}/include/" "${CMAKE_REQUIRED_INCLUDES}")
+set(CMAKE_REQUIRED_LIBRARIES "-Wl,--as-needed -lxpcomglue ${XULRUNNER_LDFLAGS}")
 CHECK_CXX_SOURCE_COMPILES(
   "#include \"defs_private.h\"
+  #include \"mozilla-config.h\"
   #include GECKO_INCLUDE(xpcom,nsDebug.h)
   #include \"wrap_gfxasurface.h\"
   
   int main() { gfxASurface* surf = 0; surf->Release(); return 0; }"
   XULRUNNER_LINKS_WITHOUT_THEBES)
 IF(NOT XULRUNNER_LINKS_WITHOUT_THEBES)
-  set(XULRUNNER_LFLAGS "-lthebes ${XULRUNNER_LFLAGS}")
+  set(XULRUNNER_LDFLAGS ${XULRUNNER_LDFLAGS} -lthebes)
 ENDIF(NOT XULRUNNER_LINKS_WITHOUT_THEBES)
 
 include_directories(${XULRUNNER_INCLUDE_DIRS})
@@ -107,33 +119,45 @@ IF(XULRUNNER_WIDGET_GTK2)
   link_libraries(${GTK_LDFLAGS})
 ENDIF(XULRUNNER_WIDGET_GTK2)
 
-IF(CMAKE_COMPILER_IS_GNUCXX)
-  add_definitions("-fno-rtti -ggdb -fvisibility-inlines-hidden -fvisibility=hidden")
-  link_libraries("-Wl,--warn-unresolved-symbols")
-  link_libraries("-Wl,--as-needed")
-ENDIF(CMAKE_COMPILER_IS_GNUCXX)
-link_directories(${XULRUNNER_LIBRARY_DIRS})
-IF(NOT CMAKE_GENERATOR MATCHES "Visual Studio")
-  message("Creating relaytool files...")
-  EXEC_PROGRAM(${OffscreenGecko_SOURCE_DIR}/bin/relaytool out/libosgk
-    ARGS --relay xul --relay nspr4 ${XULRUNNER_LDFLAGS}
-    OUTPUT_VARIABLE XULRUNNER_LFLAGS)
-  # -lxpcomglue added manually to work around xpcomglue_s appearing in LFLAGS on gentoo
-  link_libraries("-lxpcomglue ${XULRUNNER_LFLAGS}")
-ENDIF(NOT CMAKE_GENERATOR MATCHES "Visual Studio")
-
-add_definitions(-DOSGK_BUILD)
-add_definitions(-DMOZ_CAIRO_GFX)
-add_definitions(-DXPCOM_GLUE=1)
-
 file(GLOB sources *.cpp *.h)
 add_library(OffscreenGecko SHARED ${sources})
-add_dependencies(OffscreenGecko osgk-common)
+target_link_libraries(OffscreenGecko osgk-common)
+set_target_properties(OffscreenGecko PROPERTIES LINK_INTERFACE_LIBRARIES "")
 IF(NOT CMAKE_GENERATOR MATCHES "Visual Studio")
   install(TARGETS OffscreenGecko
 	  ARCHIVE DESTINATION lib
 	  LIBRARY DESTINATION lib)
 ENDIF(NOT CMAKE_GENERATOR MATCHES "Visual Studio")
+
+IF(CMAKE_COMPILER_IS_GNUCXX)
+  add_definitions("-fno-rtti -ggdb -fvisibility-inlines-hidden -fvisibility=hidden")
+  target_link_libraries(OffscreenGecko "-Wl,--warn-unresolved-symbols -Wl,--as-needed")
+ENDIF(CMAKE_COMPILER_IS_GNUCXX)
+link_directories(${XULRUNNER_LIBRARY_DIRS})
+IF(NOT CMAKE_GENERATOR MATCHES "Visual Studio")
+  message("Creating relaytool files...")
+  execute_process(
+    COMMAND ${OffscreenGecko_SOURCE_DIR}/bin/relaytool --relay xul --relay nspr4 ${XULRUNNER_LDFLAGS}
+    WORKING_DIRECTORY out/libosgk
+    OUTPUT_VARIABLE XULRUNNER_LFLAGS
+    OUTPUT_STRIP_TRAILING_WHITESPACE)
+  # @@@ FIXME(?): Disabled b/c of duplicate symbols in thebes and xul
+  #IF(NOT XULRUNNER_LINKS_WITHOUT_THEBES)
+  #  execute_process(
+  #    COMMAND ${OffscreenGecko_SOURCE_DIR}/bin/relaytool --relay thebes ${XULRUNNER_LDFLAGS}
+  #    WORKING_DIRECTORY out/libosgk
+  #    OUTPUT_VARIABLE RELAYTOOL_THEBES
+  #    OUTPUT_STRIP_TRAILING_WHITESPACE)
+  #  set(XULRUNNER_LFLAGS ${XULRUNNER_LFLAGS} ${RELAYTOOL_THEBES})
+  #ENDIF(NOT XULRUNNER_LINKS_WITHOUT_THEBES)
+  # -lxpcomglue added manually to work around xpcomglue_s appearing in LFLAGS on gentoo
+  string(STRIP "-lxpcomglue ${XULRUNNER_LFLAGS}" XULRUNNER_LFLAGS)
+  target_link_libraries(OffscreenGecko ${XULRUNNER_LFLAGS})
+ENDIF(NOT CMAKE_GENERATOR MATCHES "Visual Studio")
+
+add_definitions(-DOSGK_BUILD)
+add_definitions(-DMOZ_CAIRO_GFX)
+add_definitions(-DXPCOM_GLUE=1)
 
 IF(CMAKE_GENERATOR MATCHES "Visual Studio")
   target_link_libraries(OffscreenGecko 
