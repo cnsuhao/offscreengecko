@@ -52,7 +52,7 @@
 
 #ifdef REPAINT_DUMP
 #include <fstream>
-#include "tgawrite.h"
+#include "../common/tgawrite.h"
 #endif
 
 namespace OSGK
@@ -171,6 +171,8 @@ namespace OSGK
 
       nsEventStatus status;
       DispatchEvent (&event, status);
+      
+      Invalidate (false);
     }
 
     NS_IMETHODIMP OffscreenWidget::Validate()
@@ -306,24 +308,7 @@ namespace OSGK
       PRBool result = true;
       nsEventStatus eventStatus = nsEventStatus_eIgnore;
 
-      if (dirtyRegion->IsEmpty()) return NS_OK;
-
-#ifdef REPAINT_DUMP
-      char filename[64];
-      std::ofstream tgastream;
-      AlphaCounter localCounter;
-      if ((surface != 0) && (surface->Data() != 0))
-      {
-        snprintf (filename, sizeof (filename), 
-          "paint_%08x_%u_%s.tga", this, paintCounter, localCounter.GetStr());
-        tgastream.open (filename, std::ios::out | std::ios::binary);
-        const gfxIntSize& surfSize (surface->GetSize ());
-        TGAWriter::WriteBGRAImage (surfSize.width, surfSize.height,
-          surface->Data(), tgastream);
-        tgastream.close ();
-      }
-      ++localCounter;
-#endif
+      if (dirtyRegion->IsEmpty() && (browser || surface)) return NS_OK;
 
       nsCOMPtr<nsIRenderingContext> rc;
       nsresult rv = mContext->CreateRenderingContextInstance (*getter_AddRefs(rc));
@@ -338,6 +323,25 @@ namespace OSGK
         NS_WARNING("RC::Init failed");
         return NS_ERROR_FAILURE;
       }
+
+#ifdef REPAINT_DUMP
+      gfxImageSurface* dumpSurface = static_cast<gfxImageSurface*> (targetSurface.get());
+      
+      char filename[64];
+      std::ofstream tgastream;
+      AlphaCounter localCounter;
+      if ((dumpSurface != 0) && (dumpSurface->Data() != 0))
+      {
+        snprintf (filename, sizeof (filename), 
+          "paint_%08x_%u_%s.tga", this, paintCounter, localCounter.GetStr());
+        tgastream.open (filename, std::ios::out | std::ios::binary);
+        const gfxIntSize& surfSize (dumpSurface->GetSize ());
+        TGAWriter::WriteBGRAImage (surfSize.width, surfSize.height,
+          dumpSurface->Data(), tgastream);
+        tgastream.close ();
+      }
+      ++localCounter;
+#endif
 
       rc->SetClipRegion (*dirtyRegion, nsClipCombine_kReplace);
 
@@ -373,14 +377,14 @@ namespace OSGK
         thebesContext->SetOperator(gfxContext::OPERATOR_OVER);
 
   #ifdef REPAINT_DUMP
-        if ((surface != 0) && (surface->Data() != 0))
+        if ((dumpSurface != 0) && (dumpSurface->Data() != 0))
         {
           snprintf (filename, sizeof (filename), 
             "paint_%08x_%u_%s.tga", this, paintCounter, localCounter.GetStr());
           tgastream.open (filename, std::ios::out | std::ios::binary);
-          const gfxIntSize& surfSize (surface->GetSize ());
+          const gfxIntSize& surfSize (dumpSurface->GetSize ());
           TGAWriter::WriteBGRAImage (surfSize.width, surfSize.height,
-            surface->Data(), tgastream);
+            dumpSurface->Data(), tgastream);
           tgastream.close ();
         }
   #endif
@@ -394,14 +398,14 @@ namespace OSGK
 #ifdef REPAINT_DUMP
       ++localCounter;
 
-      if ((surface != 0) && (surface->Data() != 0))
+      if ((dumpSurface != 0) && (dumpSurface->Data() != 0))
       {
         snprintf (filename, sizeof (filename), 
           "paint_%08x_%u_%s.tga", this, paintCounter, localCounter.GetStr());
         tgastream.open (filename, std::ios::out | std::ios::binary);
-        const gfxIntSize& surfSize (surface->GetSize ());
+        const gfxIntSize& surfSize (dumpSurface->GetSize ());
         TGAWriter::WriteBGRAImage (surfSize.width, surfSize.height,
-          surface->Data(), tgastream);
+          dumpSurface->Data(), tgastream);
         tgastream.close ();
       }
       ++localCounter;
@@ -431,14 +435,14 @@ namespace OSGK
       }
 
 #ifdef REPAINT_DUMP
-      if ((surface != 0) && (surface->Data() != 0))
+      if ((dumpSurface != 0) && (dumpSurface->Data() != 0))
       {
         snprintf (filename, sizeof (filename), 
           "paint_%08x_%u_%s.tga", this, paintCounter, localCounter.GetStr());
         tgastream.open (filename, std::ios::out | std::ios::binary);
-        const gfxIntSize& surfSize (surface->GetSize ());
+        const gfxIntSize& surfSize (dumpSurface->GetSize ());
         TGAWriter::WriteBGRAImage (surfSize.width, surfSize.height,
-          surface->Data(), tgastream);
+          dumpSurface->Data(), tgastream);
         tgastream.close ();
       }
       paintCounter++;
@@ -515,6 +519,7 @@ namespace OSGK
         gfxIntSize size (mBounds.width, mBounds.height);
         surface = new gfxImageSurface (size,
           gfxASurface::ImageFormatARGB32);
+	dirtyRegion->Union (0, 0, mBounds.width, mBounds.height);
       }
       return surface;
     }
