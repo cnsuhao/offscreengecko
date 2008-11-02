@@ -54,6 +54,9 @@
  *
  * If you're programming in C++ instead, you might be more interested in
  * <a href="annotated.html">the class list</a>.
+ *
+ * <em>Examples</em> can be found in the
+ * <a href="pages.html">Related Pages section</a>.
  */
 
 /**\page Basics OffscreenGecko object basics
@@ -88,12 +91,12 @@
  * \section BasicsCXX Dealing with OffscreenGecko objects (C++)
  * The OffscreenGecko C++ interface wraps all OffscreenGecko objects into C++
  * classes; so instead of calling a function and passing in the opaque object
- * pointer you can directly a method on the object. Furthermore, reference
+ * pointer you can directly call a method on the object. Furthermore, reference
  * counting is handled automatically when an object is created, destroyed,
  * copied etc.
  *
  * However, to use these classes efficiently, an implementation detail must be
- * noted: the classes merely wrap the opaque pointers from the C interface.
+ * noted: the C++ classes merely wrap the opaque pointers from the C interface.
  * This has several implications:
  * - A copy is not a true copy - the "copy" is merely an additional reference
  *   to the same object as the original.
@@ -102,26 +105,18 @@
  * In that sense, the wrapper classes have a behaviour that more resembles Java
  * references to classes than "true" C++ inlined classes.
  *
- * An instance of the wrapped object is created immediately when the wrapper
- * class is constructed. Delayed creation is still possible, though: for that,
- * the wrapper must be initialized with a <i>null reference</i>. Later, a new
- * instance of the wrapper for the desired object can be assigned. Example:
- * \code
- * // Initializes as a "null reference"
- * OSGK::Browser myBrowser (OSGK::Browser::Null());
- *
- * // ... do other stuff ...
- *
- * // Now actually create an object
- * myBrowser = OSGK::Browser (...);
- * \endcode
+ * In C++, an instance of the wrapped object type is created immediately when 
+ * the wrapper class is constructed. Delayed creation is still possible, 
+ * though: for that, the wrapper must be initialized with a <i>null reference</i>. 
+ * Later, a new instance of the wrapper type for the desired object can be assigned. 
+ * For example code see \ref example_delayedcreation.
  */
-
+ 
 /**
  * Base OffscreenGecko object. All other types derive from this.
  * @{
  */
-struct OSGK_BaseObject_s
+typedef struct OSGK_BaseObject_s
 {
 #ifdef OSGK_BUILD
   ///\internal Object reference count
@@ -131,8 +126,8 @@ struct OSGK_BaseObject_s
   int reserved;
 # endif
 #endif
-};
-typedef struct OSGK_BaseObject_s OSGK_BaseObject;
+}
+OSGK_BaseObject;
 /** @} */
 
 #define OSGK_DERIVEDTYPE(T)           \
@@ -182,6 +177,10 @@ namespace OSGK
       /// Wrapped object
       T* obj;
     public:
+      /**
+       * Return a <i>null instance</i> of the wrapped object type.
+       * Useful when creating objects in a delayed fashion.
+       */
       static WrappedType* Null() { return 0; }
     
       /// Construct with taking ownership of a given object.
