@@ -37,7 +37,7 @@
 #include "defs_private.h"
 #include "mozilla-config.h"
 
-#include "string.h"
+#include "osgk_string.h"
 
 #include "OffscreenGecko/string.h"
 

@@ -37,8 +37,8 @@
 #define _CRT_SECURE_NO_WARNINGS
 #include "defs_private.h"
 
+#include "osgk_string.h"
 #include "scriptvariant.h"
-#include "string.h"
 
 #include GECKO_INCLUDE(xpcom,nsCOMPtr.h)
 #include GECKO_INCLUDE(xpcom,nsComponentManagerUtils.h)

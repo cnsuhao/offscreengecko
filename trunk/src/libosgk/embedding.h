@@ -50,8 +50,8 @@
 #include "DirectoryService.h"
 #include "OffscreenComponents.h"
 #include "geckomem.h"
+#include "osgk_string.h"
 #include "ref.h"
-#include "string.h"
 
 namespace OSGK
 {
