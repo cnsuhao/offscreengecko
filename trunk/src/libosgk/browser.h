@@ -154,6 +154,9 @@ namespace OSGK
       
       OSGK_LoadState QueryLoadState ();
       float QueryLoadProgress ();
+      
+      bool GetPreferredDimensions (int& preferredWidth, int& preferredHeight,
+	int maxWidth);
 
       gfxASurface* GetSurface() { return surface; }
       enum
