@@ -38,7 +38,7 @@
 
 namespace OSGK
 {
-  bool TGAWriter::WriteBGRAImage (int width, int height, void* data,
+  bool TGAWriter::WriteBGRAImage (int width, int height, const void* data,
                                   std::ostream& out)
   {
     TGAWriter w (out);
