@@ -9,13 +9,11 @@ Prerequisites:
     build.
   
   - cmake:
-    To generate project files (as they depend on local paths). Note that at
-    least cmake 2.4.7 has a bug that prevents certain linker flags from
-    appearing in the generated project files; however, at least version
-    2.5.20071122 works correctly.
+    To generate project files (as they depend on local paths). At least cmake 2.6
+    is required.
   
   - A build of Gecko 1.9:
-    This can either be the pre-built XULrunner SDK or any a customized version
+    This can either be the pre-built XULrunner SDK or a customized version
     built from the mozilla.org sources.
 
 Generating projects:

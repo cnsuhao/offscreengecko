@@ -4,6 +4,9 @@ Prerequisites:
  - Compiler, of course. You may have to install extra packages on some
    distros for that.
    
+  - cmake:
+    The build system used for OffscreenGecko. At least cmake 2.6 is required.
+  
  - A build of Gecko 1.9:
    This can either be the pre-built XULrunner SDK, a version that ships with
    your or a customized version built from the mozilla.org sources.
