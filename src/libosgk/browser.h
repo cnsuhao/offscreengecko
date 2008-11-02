@@ -151,6 +151,9 @@ namespace OSGK
 
       bool SetUserData (unsigned int key, void* data, bool overrideData);
       bool GetUserData (unsigned int key, void*& data);
+      
+      OSGK_LoadState QueryLoadState ();
+      float QueryLoadProgress ();
 
       gfxASurface* GetSurface() { return surface; }
       enum

@@ -343,6 +343,40 @@ OSGK_EXTERN_C OSGK_API int osgk_browser_get_user_data (OSGK_Browser* browser,
   unsigned int key, void** data);
 /** @} */
 
+/**\name Progress queries
+ * @{ */
+
+/// URI loading state
+typedef enum OSGK_LoadState
+{
+  /// Loading is in progress
+  loadLoading,
+  /// Loading is completed
+  loadFinished
+} OSGK_LoadState;
+
+/**
+ * Poll the loading state.
+ * \param browser The browser object.
+ * \return The loading state (loading or completed).
+ */
+OSGK_EXTERN_C OSGK_API OSGK_LoadState osgk_browser_query_load_state (
+  OSGK_Browser* browser);
+
+/**
+ * Poll the loading progress.
+ * \param browser The browser object.
+ * \return A float value between 0 and 1 where 0 means loading did not
+ *   progress and 1 means loading is completed.
+ * \remarks This function is intended for feedback display. To programmatically
+ *   check whether a URI was loaded completely use
+ *   osgk_brower_query_load_state().
+ */
+OSGK_EXTERN_C OSGK_API float osgk_browser_query_load_progress (
+  OSGK_Browser* browser);
+
+/** @} */
+
 #ifdef __cplusplus
 namespace OSGK
 {
@@ -556,7 +590,33 @@ namespace OSGK
       return osgk_browser_get_user_data (GetObject(), key, &data) != 0;
     }
     /** @} */
-  };
+
+    /**\name Progress queries
+     * @{ */
+
+    /**
+     * Poll the loading state.
+     * \return The loading state (loading or completed).
+     */
+    OSGK_LoadState QueryLoadState ()
+    {
+      return osgk_browser_query_load_state (GetObject());
+    }
+
+    /**
+     * Poll the loading progress.
+     * \return A float value between 0 and 1 where 0 means loading did not
+     *   progress and 1 means loading is completed.
+     * \remarks This function is intended for feedback display. To programmatically
+     *   check whether a URI was loaded completely use QueryLoadState().
+     */
+    float QueryLoadProgress ()
+    {
+      return osgk_browser_query_load_progress (GetObject());
+    }
+
+    /** @} */
+    };
   
 } // namespace OSGK
 #endif
