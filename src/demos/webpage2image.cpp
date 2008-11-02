@@ -76,6 +76,16 @@ int main (int argc, const char* const argv[])
     usleep (500);
   }
   
+  // Get a size that covers all of the page without scrollbars
+  if (!browser.GetPreferredDimensions (renderW, renderH, renderW))
+  {
+    fputs ("Error when determining preferred image dimensions\n", stderr);
+    return 1;
+  }
+  
+  // Set the browser size to the preferred size we just obtained
+  browser.Resize (renderW, renderH);
+  
   // Open output file
   std::ofstream tgastream;
   tgastream.open (outputFilename, std::ios::out | std::ios::binary);
