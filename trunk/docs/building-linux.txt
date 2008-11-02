@@ -1,0 +1,22 @@
+BUILDING OFFSCREENGECKO FOR LINUX
+
+Prerequisites:
+ - Compiler, of course. You may have to install extra packages on some
+   distros for that.
+   
+ - A build of Gecko 1.9:
+   This can either be the pre-built XULrunner SDK, a version that ships with
+   your or a customized version built from the mozilla.org sources.
+   Note that building against the version from your distro may mean that
+   OffscreenGecko does not work on other distros. For maximum compatibility
+   I recommend using a pre-built SDK and shipping the binaries from that with
+   your app.
+   
+Actually building OffscreenGecko:
+  Run 'cmake' to generate Makefiles, run 'make' to do the building itself.
+  Currently, the application linking will result in a number of warnings for
+  unresolved symbols. These can be ignored.
+
+Caveat:
+  Main Linux development is done on Gentoo; OffscreenGecko works & builds there
+  with the distro-supplied XULrunner. For other distros YMMV.
