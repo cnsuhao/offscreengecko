@@ -7,6 +7,3 @@ It may or may not work with later nightlies.
 You will either have to give the directory with the XULrunner binaries as
 an additional path to search for XULrunner to OffscreenGecko (see API docs)
 or set the GRE_HOME variable to that directory.
-
-The embedding application must regularly pump messages to all Windows. (This
-is usually the case.)
