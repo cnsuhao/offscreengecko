@@ -89,9 +89,9 @@ class nsAFlatCString;
 #include GECKO_INCLUDE(dom,nsIDOMDocument.h)
 #include GECKO_INCLUDE(dom,nsIDOMWindow.h)
 #include GECKO_INCLUDE(embed_base,nsEmbedCID.h)
-#include GECKO_INCLUDE(generic,nsHTMLReflowState.h)
 #include GECKO_INCLUDE(layout,nsIDocumentViewer.h)
 #include GECKO_INCLUDE(layout,nsIFrame.h)
+#include GECKO_INCLUDE(layout,nsHTMLReflowState.h)
 #include GECKO_INCLUDE(layout,nsPresContext.h)
 #include GECKO_INCLUDE(webbrwsr,nsIWebBrowserSetup.h)
 #include GECKO_INCLUDE(widget,nsIWidget.h)
@@ -103,6 +103,13 @@ class nsAFlatCString;
 
 #ifdef MOZ_WIDGET_GTK2
 #include "gtk/gtk.h"
+#endif
+
+#ifdef WIN32
+#ifndef WIN32_LEAN_AND_MEAN
+#define WIN32_LEAN_AND_MEAN
+#endif
+#include <windows.h>
 #endif
 
 /* Depends on whether a modification I made to gecko makes it into the source -
@@ -333,6 +340,18 @@ namespace OSGK
     {
     #ifdef MOZ_WIDGET_GTK2
       gtk_main_iteration_do (FALSE);
+    #elif defined(WIN32)
+      MSG msg;
+      while (PeekMessage (&msg, 0, 0, 0, PM_NOREMOVE))
+      {
+	// Make sure that WM_QUIT is passed back to the host app
+	if (msg.message == WM_QUIT) return;
+	if (GetMessage (&msg, 0, 0, 0) >= 0)
+	{
+	  TranslateMessage(&msg); 
+	  DispatchMessage(&msg); 
+	}
+      }
     #endif
     }
     
