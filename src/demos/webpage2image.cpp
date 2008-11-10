@@ -29,7 +29,13 @@ POSSIBILITY OF SUCH DAMAGE.
 */
 
 #include <stdio.h>
+#ifdef WIN32
+#define WIN32_LEAN_AND_MEAN
+#include <windows.h>
+#define usleep(x) Sleep(x)
+#else
 #include <unistd.h> // for usleep()
+#endif
 
 #include <OffscreenGecko/browser.h>
 
