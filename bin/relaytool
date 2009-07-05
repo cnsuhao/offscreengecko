@@ -122,11 +122,9 @@ function relay() {
     if $using_partial_map; then
         functions=$( grep "^F " "$partial_map" | cut -d' ' -f2 )
         variables=$( grep "^V " "$partial_map" | cut -d' ' -f2 )
-        variables_weak=
     else
         functions=$( nm --extern-only -D "$lib" | awk '{ if (($2 == "T") || ($2 == "W")) print $3; }' | LC_ALL=C grep -v '\(\<_init\>\|\<_fini\>\)' | LC_ALL=C sort -u )
-        variables=$( nm --extern-only -D "$lib" | awk '{ if (($2 == "D") || ($2 == "G") || ($2 == "B")) print $3; }' | LC_ALL=C sort -u )
-	variables_weak=$( nm --extern-only -D "$lib" | awk '{ if (($2 == "V")) print $3; }' | LC_ALL=C sort -u )
+        variables=$( nm --extern-only -D "$lib" | awk '{ if (($2 == "D") || ($2 == "G") || ($2 == "B") || ($2 == "V")) print $3; }' | LC_ALL=C sort -u )
     fi
     if $using_minimal_list; then
         functions="$functions
@@ -135,12 +133,9 @@ $( nm `echo "$object_list"` | awk '{ if ($1 == "U") print $2; }' | LC_ALL=C sort
         variables="$variables
 $( nm `echo "$object_list"` | awk '{ if ($1 == "U") print $2; }' | LC_ALL=C sort -u )"
         variables=$( echo "$variables" | LC_ALL=C sort | LC_ALL=C uniq -d )
-        variables_weak="$variables_weak
-$( nm `echo "$object_list"` | awk '{ if ($1 == "U") print $2; }' | LC_ALL=C sort -u )"
-        variables_weak=$( echo "$variables_weak" | LC_ALL=C sort | LC_ALL=C uniq -d )
     fi
 
-    if [ "$functions" == "" ] && [ "$variables" == "" ] && [ "$variables_weak" == "" ]; then
+    if [ "$functions" == "" ] && [ "$variables" == "" ]; then
         # Nothing will be used, so do nothing for that lib
         exit 1
     fi
@@ -182,9 +177,6 @@ EOF
     for s in $variables; do
         echo "    \"$s\"," >>"$outfile"
     done
-    for s in $variables_weak; do
-        echo "    \"$s\"," >>"$outfile"
-    done
     echo "    0" >>"$outfile"
 
     cat <<EOF >>"$outfile"
@@ -203,9 +195,9 @@ static void *handle = 0;
     #define ASM_FUNC(x)     #x "@PLT"
     #define ASM_FIXUPVAR(x) #x "@GOTOFF(%%ebx)"
   #elif defined( __x86_64__ )
-    #define ASM_VAR(x)      #x "@GOT(%rbx)"
+    #define ASM_VAR(x)      #x "@GOTPCREL(%rip)"
     #define ASM_FUNC(x)     #x "@PLT"
-    #define ASM_FIXUPVAR(x) #x "@GOT(%%rbx)"
+    #define ASM_FIXUPVAR(x) #x "@GOTPCREL(%%rip)"
   #endif
 #endif
 
@@ -298,16 +290,16 @@ cat <<EOF >>"$outfile"
 
     /* build function jumptable */
     while (functions[i++]) ptrs[i - 1] = dlsym( handle, functions[i - 1] );
-    
-    void* symptr;
 EOF
 
-    if [ "$variables" != "" ] || [ "$variables_weak" != "" ]; then echo "    /* now fixup the global offset table for variable imports */" >>"$outfile"; fi
+    if [ "$variables" != "" ]; then 
+	cat <<EOF >>"$outfile"
+    
+    /* now fixup the global offset table for variable imports */
+    void* symptr;
+EOF
+	fi
     for s in $variables; do
-        echo "    symptr = dlsym(handle, \"$s\");" >>"$outfile"
-        echo "    FIXUP_GOT_RELOC( $s, symptr );" >>"$outfile"
-    done
-    for s in $variables_weak; do
         echo "    symptr = dlsym(handle, \"$s\");" >>"$outfile"
         echo "    FIXUP_GOT_RELOC( $s, symptr );" >>"$outfile"
     done
@@ -341,6 +333,7 @@ EOF
         "        .type " name ", @function\n"  \\
         name ":\n" \\
         "        movq " ASM_VAR (ptrs) ", %r11\n" \\
+        "        movq (%r11), %r11\n" \\
         "        movq " #index "(%r11), %r11\n" \\
         "        test %r11, %r11\n" \\
         "        jnz  JS" #index "\n" \\
@@ -377,9 +370,6 @@ EOF
 
     for s in $variables; do
         echo "int $s __attribute__(( visibility(\"hidden\") )) = -1;" >>"$outfile"
-    done
-    for s in $variables_weak; do
-        echo "int $s __attribute__((weak)) __attribute__(( visibility(\"hidden\") )) = -1;" >>"$outfile"
     done
 
     cat <<EOF >>"$outfile"
@@ -455,14 +445,15 @@ case `uname -m` in
     i386 | i486 | i586 | i686 )
         arch_ok=true
         arch_ptr_size=4
+        searchpath=( "/usr/lib" "/usr/local/lib" "/lib" `pwd` )
         ;;
     x86_64)
         arch_ok=true
         arch_ptr_size=8
+        searchpath=( "/usr/lib" "/usr/local/lib" "/lib" "/usr/lib64" "/usr/local/lib64" "/lib64" `pwd` )
         ;;                                   
 esac
 
-searchpath=( "/usr/lib" "/usr/local/lib" "/lib" `pwd` )
 multilinklist=( )
 relaylist=( )
 
@@ -546,8 +537,12 @@ while (( i <= $# )); do
                         stubobj=$( echo "$stubfile" | sed 's/\.c$/\.o/' )
 			# remove -include flags from CFLAGS, if any
 			CFLAGS=$( echo $CFLAGS | sed 's/-include .*\.h//g' )
-                        ${CC:-gcc} ${CFLAGS} -fPIC -DPIC -c -o "$stubobj" "$stubfile" 2>/dev/tty
-                        echo -n "$stubobj "
+                        # ${CC:-gcc} ${CFLAGS} -fPIC -DPIC -c -o "$stubobj" "$stubfile" 2>/dev/tty
+			${CC:-gcc} ${CFLAGS} -fPIC -DPIC -c -o "$stubobj" "$stubfile"
+			# We may have to patch the GOT at runtime; instruct
+			# linker to not mark it as RELRO, which will cause it
+			# to be read-only after the loader performed relocation.
+                        echo -n "$stubobj -Wl,-z,norelro "
                     fi
 
                     echo -n "-l$lib "
@@ -580,7 +575,8 @@ while (( i <= $# )); do
                         stubobj=$( echo "$stubfile" | sed 's/\.c$/\.o/' )
 			# remove -include flags from CFLAGS, if any
 			CFLAGS=$( echo $CFLAGS | sed 's/-include .*\.h//g' )
-                        ${CC:-gcc} ${CFLAGS} -fPIC -DPIC -c -o "$stubobj" "$stubfile" 2>/dev/tty
+                        # ${CC:-gcc} ${CFLAGS} -fPIC -DPIC -c -o "$stubobj" "$stubfile" 2>/dev/tty
+			${CC:-gcc} ${CFLAGS} -fPIC -DPIC -c -o "$stubobj" "$stubfile"
                         echo -n "$stubobj "
                     fi
 
