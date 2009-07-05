@@ -89,10 +89,10 @@ public:
   NS_IMETHOD  GetSystemFont(nsSystemFontID aID, nsFont *aFont) const
   { return thebesDC->GetSystemFont (aID, aFont); }
   NS_IMETHOD  GetMetricsFor(const nsFont& aFont, nsIAtom* aLangGroup,
-                            nsIFontMetrics*& aMetrics)
-  { return thebesDC->GetMetricsFor (aFont, aLangGroup, aMetrics); }
-  NS_IMETHOD  GetMetricsFor(const nsFont& aFont, nsIFontMetrics*& aMetrics)
-  { return thebesDC->GetMetricsFor (aFont, aMetrics); }
+                            gfxUserFontSet* fs, nsIFontMetrics*& aMetrics)
+  { return thebesDC->GetMetricsFor (aFont, aLangGroup, fs, aMetrics); }
+  NS_IMETHOD  GetMetricsFor(const nsFont& aFont, gfxUserFontSet* fs, nsIFontMetrics*& aMetrics)
+  { return thebesDC->GetMetricsFor (aFont, fs, aMetrics); }
   NS_IMETHOD CheckFontExistence(const nsString& aFaceName)
   { return thebesDC->CheckFontExistence (aFaceName); }
   NS_IMETHOD FirstExistingFont(const nsFont& aFont, nsString& aFaceName)

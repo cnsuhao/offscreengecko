@@ -236,7 +236,7 @@ namespace OSGK
     
       NS_IMETHOD SetTitle(const nsAString& aTitle) { return NS_ERROR_NOT_IMPLEMENTED; }
     
-      NS_IMETHOD SetMenuBar(nsIMenuBar * aMenuBar) { return NS_ERROR_NOT_IMPLEMENTED; }
+      NS_IMETHOD SetMenuBar(void* aMenuBar) { return NS_ERROR_NOT_IMPLEMENTED; }
     
       NS_IMETHOD ShowMenuBar(PRBool aShow) { return NS_ERROR_NOT_IMPLEMENTED; }
     
