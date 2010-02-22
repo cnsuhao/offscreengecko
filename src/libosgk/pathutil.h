@@ -39,6 +39,7 @@
 
 #include "defs_private.h"
 #include <string>
+#include <stdlib.h>
 
 #if defined(XP_WIN)
 # include <direct.h>
