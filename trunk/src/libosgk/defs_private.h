@@ -39,6 +39,7 @@
 
 #include <stdio.h>
 #include <stdarg.h>
+#include <limits.h>
 
 #define _GECKO_INCLUDE_STRINGIZE(X)             _GECKO_INCLUDE_STRINGIZE2(#X)
 #define _GECKO_INCLUDE_STRINGIZE2(X)            X
