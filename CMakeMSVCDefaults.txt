@@ -6,7 +6,7 @@ SET (CMAKE_CONFIGURATION_TYPES "Debug;Release" CACHE STRING "")
 SET (CMAKE_CXX_STACK_SIZE "" CACHE STRING "")
 
 # Removed Compiler heap setting; exceptions disabled; RTTI disabled
-SET (CMAKE_CXX_FLAGS "/DWIN32 /D_WINDOWS /W3 /GR-" CACHE STRING "")
+SET (CMAKE_CXX_FLAGS "/DWIN32 /D_WINDOWS /W3 /GR- /EHsc" CACHE STRING "")
 # Enable full debug info
 SET (CMAKE_CXX_FLAGS_DEBUG "/D_DEBUG /MTd /ZI /Ob0 /Od /RTC1" CACHE STRING "")
 # Enable debug info
