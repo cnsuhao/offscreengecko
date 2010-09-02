@@ -27,4 +27,6 @@
  * (OSGK::TGAWriter is an OffscreenGecko-internal class; but the image 
  * writing is not the point of the example anyway.)
  * \include webpage2image.cpp
+ * Same functionality, but written in pure C:
+ * \include webpage2image.c
  */
